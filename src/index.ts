@@ -1,5 +1,5 @@
 import * as mod from './external';
 
 export * from './external';
-// export { mod as MODULE_NAME };
+export { mod as resource };
 export default mod;
