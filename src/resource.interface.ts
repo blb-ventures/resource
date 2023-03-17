@@ -71,15 +71,17 @@ export interface Field<
   validate?: () => null | false | string;
 }
 
-export interface APIFieldObject<
+export type APIFieldObject<
   FieldKey extends string = string,
   FieldObjectKey extends string = string,
-> {
-  fields: (Field<FieldKey> | FieldObject<FieldKey, FieldObjectKey>)[];
+> = {
+  fields:
+    | (APIField<FieldKey> | APIFieldObject<FieldKey, FieldObjectKey>)[]
+    | Record<string, APIField<FieldKey> | APIFieldObject<FieldKey, FieldObjectKey>>;
   label: string;
   name: string;
   objKind: FieldObjectKey;
-}
+};
 
 export interface FieldObject<
   FieldKey extends string = string,

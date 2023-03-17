@@ -14,7 +14,7 @@ import {
   FormAdapter,
   ValidationAdapter,
 } from './resource.interface';
-import { isAPIField, isField } from './resource.typeguards';
+import { isAPIField } from './resource.typeguards';
 
 export class FieldImpl<
   FieldKey extends string = string,
@@ -24,25 +24,15 @@ export class FieldImpl<
 > implements Field<FieldKey, Props, RenderResult, ValidationResult>
 {
   choices?: FieldChoice[] | null;
-
   defaultValue?: any;
-
   filterable?: boolean;
-
   helpText?: string | null;
-
   kind: FieldKey;
-
   label: string;
-
   multiple?: boolean;
-
   name: string;
-
   orderable?: boolean;
-
   resource?: string | null;
-
   validation?: FieldValidation;
 
   constructor(field: APIField<FieldKey>) {
@@ -77,19 +67,22 @@ export class FieldObjectImpl<
 > implements FieldObject<FieldKey, FieldObjectKey, Props, RenderResult, ValidationResult>
 {
   fields: (Field<FieldKey> | FieldObject<FieldKey, FieldObjectKey>)[];
-
+  fieldsByName: Record<string, Field<FieldKey> | FieldObject<FieldKey, FieldObjectKey>>;
   label: string;
-
   name: string;
-
   objKind: FieldObjectKey;
 
   constructor(field: APIFieldObject<FieldKey, FieldObjectKey>) {
-    this.fields = field.fields.map(f =>
-      isField<FieldKey, FieldObjectKey>(f)
+    const fields = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
+    this.fields = fields.map(f =>
+      isAPIField<FieldKey, FieldObjectKey>(f)
         ? new FieldImpl(f)
         : new FieldObjectImpl<FieldKey, FieldObjectKey>(f),
     );
+    this.fieldsByName = this.fields.reduce((acc, f) => {
+      acc[f.name] = f;
+      return acc;
+    }, {} as Record<string, Field<FieldKey> | FieldObject<FieldKey, FieldObjectKey>>);
     this.label = field.label;
     this.name = field.name;
     this.objKind = field.objKind;
@@ -106,13 +99,9 @@ export class ResourcesManager<
   FieldObjectKey extends string = string,
 > {
   fieldByKind: Partial<Record<FieldKey, FieldConstructor>>;
-
   private DefaultField: FieldConstructor;
-
   private DefaultFieldObject: FieldObjectConstructor<FieldKey, FieldObjectKey>;
-
   private validationAdapter?: ValidationAdapter<FieldKey, FieldObjectKey>;
-
   private formAdapter?: FormAdapter<FieldKey, FieldObjectKey>;
 
   constructor(options: {

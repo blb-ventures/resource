@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ES6", "DOM", "ES2016"],
+    "lib": ["ES6", "DOM", "ES2017"],
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "resolveJsonModule": true,
