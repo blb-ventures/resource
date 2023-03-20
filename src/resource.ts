@@ -4,6 +4,7 @@
 import {
   APIField,
   APIFieldObject,
+  APIResource,
   APIResourceField,
   Field,
   FieldChoice,
@@ -12,22 +13,24 @@ import {
   FieldObjectConstructor,
   FieldValidation,
   FormAdapter,
+  ResourceField,
+  ResourceFieldPath,
   ValidationAdapter,
 } from './resource.interface';
 import { isAPIField } from './resource.typeguards';
 
 export class FieldImpl<
-  FieldKey extends string = string,
+  FieldKinds extends string = string,
   Props = any,
   RenderResult = any,
   ValidationResult = any,
-> implements Field<FieldKey, Props, RenderResult, ValidationResult>
+> implements Field<FieldKinds, Props, RenderResult, ValidationResult>
 {
   choices?: FieldChoice[] | null;
   defaultValue?: any;
   filterable?: boolean;
   helpText?: string | null;
-  kind: FieldKey;
+  kind: FieldKinds;
   label: string;
   multiple?: boolean;
   name: string;
@@ -35,7 +38,7 @@ export class FieldImpl<
   resource?: string | null;
   validation?: FieldValidation;
 
-  constructor(field: APIField<FieldKey>) {
+  constructor(field: APIField<FieldKinds>) {
     this.choices = field.choices;
     this.defaultValue = field.defaultValue;
     this.filterable = field.filterable;
@@ -58,101 +61,146 @@ export class FieldImpl<
   }
 }
 
+type Resources<Keys extends PropertyKey, FieldKinds extends string = string, FieldObjectKey extends string = string> = Record<Keys, Record<string, ResourceField<FieldKinds, FieldObjectKey>>>;
+
 export class FieldObjectImpl<
-  FieldKey extends string = string,
-  FieldObjectKey extends string = string,
+  FieldObjectKinds extends string = string,
   Props = any,
   RenderResult = any,
   ValidationResult = any,
-> implements FieldObject<FieldKey, FieldObjectKey, Props, RenderResult, ValidationResult>
+> implements FieldObject<FieldObjectKinds, Props, RenderResult, ValidationResult>
 {
-  fields: (Field<FieldKey> | FieldObject<FieldKey, FieldObjectKey>)[];
-  fieldsByName: Record<string, Field<FieldKey> | FieldObject<FieldKey, FieldObjectKey>>;
   label: string;
   name: string;
-  objKind: FieldObjectKey;
+  objKind: FieldObjectKinds;
+  objType: string;
 
-  constructor(field: APIFieldObject<FieldKey, FieldObjectKey>) {
-    const fields = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
-    this.fields = fields.map(f =>
-      isAPIField<FieldKey, FieldObjectKey>(f)
-        ? new FieldImpl(f)
-        : new FieldObjectImpl<FieldKey, FieldObjectKey>(f),
-    );
-    this.fieldsByName = this.fields.reduce((acc, f) => {
-      acc[f.name] = f;
-      return acc;
-    }, {} as Record<string, Field<FieldKey> | FieldObject<FieldKey, FieldObjectKey>>);
+  constructor(field: APIFieldObject<FieldObjectKinds>) {
     this.label = field.label;
     this.name = field.name;
     this.objKind = field.objKind;
+    this.objType = field.objType;
   }
 
   display(value: unknown): string {
-    return this.fields.map(f => `${f.label} = ${f.display(value) ?? ''}`).join('\n');
+    return '';
   }
 }
 
-// TODO: add support for custom field matcher (and save all registered fields)
+// TODO: add support for custom field matcher
 export class ResourcesManager<
-  FieldKey extends string = string,
-  FieldObjectKey extends string = string,
+  const APIResources extends Record<string, APIResource<FieldKinds, FieldObjectKinds>>,
+  FieldKinds extends string = string,
+  FieldObjectKinds extends string = string,
 > {
-  fieldByKind: Partial<Record<FieldKey, FieldConstructor>>;
+  fieldByKind: Partial<Record<FieldKinds, FieldConstructor>>;
   private DefaultField: FieldConstructor;
-  private DefaultFieldObject: FieldObjectConstructor<FieldKey, FieldObjectKey>;
-  private validationAdapter?: ValidationAdapter<FieldKey, FieldObjectKey>;
-  private formAdapter?: FormAdapter<FieldKey, FieldObjectKey>;
+  private DefaultFieldObject: FieldObjectConstructor<FieldObjectKinds, keyof APIResources>;
+  private validationAdapter?: ValidationAdapter<FieldKinds, FieldObjectKinds>;
+  private formAdapter?: FormAdapter<FieldKinds, FieldObjectKinds>;
+  private resources: Resources<keyof APIResources, FieldKinds, FieldObjectKinds>;
 
-  constructor(options: {
-    fieldByKind: Partial<Record<FieldKey, FieldConstructor>>;
-    defaultField?: FieldConstructor;
-    defaultFieldObject?: FieldObjectConstructor<FieldKey, FieldObjectKey>;
-    validationAdapter?: ValidationAdapter<FieldKey, FieldObjectKey>;
-    formAdapter?: FormAdapter<FieldKey, FieldObjectKey>;
-  }) {
+  constructor(
+    resources: APIResources,
+    options: {
+      fieldByKind: Partial<Record<FieldKinds, FieldConstructor>>;
+      defaultField?: FieldConstructor;
+      defaultFieldObject?: FieldObjectConstructor<FieldObjectKinds, keyof APIResources>;
+      validationAdapter?: ValidationAdapter<FieldKinds, FieldObjectKinds>;
+      formAdapter?: FormAdapter<FieldKinds, FieldObjectKinds>;
+    },
+  ) {
+    this.resources = this.processResources(resources);
     this.fieldByKind = options.fieldByKind;
     this.DefaultField = options.defaultField ?? (FieldImpl as FieldConstructor);
     this.DefaultFieldObject =
       options.defaultFieldObject ??
-      (FieldObjectImpl as FieldObjectConstructor<FieldKey, FieldObjectKey>);
+      (FieldObjectImpl as FieldObjectConstructor<FieldObjectKinds, keyof APIResources>);
     this.validationAdapter = options.validationAdapter;
     this.formAdapter = options.formAdapter;
+  }
+
+  private processResources(apiResources: APIResources): Resources<keyof APIResources, FieldKinds, FieldObjectKinds> {
+    const resources = Object.entries(apiResources).reduce((acc, [resourceKey, resource]) => {
+      acc[resourceKey as keyof APIResources] = Object.entries(resource).reduce((acc2, [fieldKey, field]) => {
+        acc2[fieldKey] = this.getFieldInstance(field);
+        return acc2;
+      }, {} as Record<string, ResourceField<FieldKinds, FieldObjectKinds>>);
+      return acc;
+    }, {} as Resources<keyof APIResources, FieldKinds, FieldObjectKinds>);
+    return resources;
   }
 
   getFieldInstance<
     Props extends Record<string, unknown> = Record<string, unknown>,
     RenderResult = any,
-  >(field: APIResourceField<FieldKey, FieldObjectKey>) {
+  >(field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources>): Field<FieldKinds, Props, RenderResult> | FieldObject<FieldObjectKinds, Record<string, unknown>, any> {
     if (isAPIField(field)) {
       const FieldClass =
-        field.kind in this.fieldByKind && this.fieldByKind[field.kind as FieldKey] != null
-          ? this.fieldByKind[field.kind as FieldKey]
+        field.kind in this.fieldByKind && this.fieldByKind[field.kind as FieldKinds] != null
+          ? this.fieldByKind[field.kind as FieldKinds] as FieldConstructor
           : this.DefaultField;
-      return new FieldClass!<FieldKey, Props, RenderResult>(field);
+      return new FieldClass<FieldKinds, Props, RenderResult>(field);
     }
     return new this.DefaultFieldObject(field);
   }
 
-  display(value: unknown, field: APIResourceField<FieldKey, FieldObjectKey> | FieldKey) {
-    const fieldInstance =
-      typeof field === 'string'
-        ? this.fieldByKind[field] != null
-          ? new this.fieldByKind[field]!({ kind: field as FieldKey, label: '', name: '' })
-          : new this.DefaultField({ kind: field as FieldKey, label: '', name: '' })
-        : this.getFieldInstance(field);
-    return fieldInstance.display(value);
+  getField(path: ResourceFieldPath<APIResources>) {
+    const [resourceName, fieldName, subFieldName] = path.split('.') as [string, string | null, string | null];
+    const resource = this.resources[resourceName];
+    if(resource == null || fieldName == null) return null;
+    const field = Array.isArray(resource) ? resource.find(f => f.name === fieldName) : resource[fieldName];
+    if(subFieldName == null || field == null || isAPIField(field)) return field;
+    const refType = this.resources[field.objType];
+    return Array.isArray(refType) ? refType.find(f => f.name === subFieldName) : refType[subFieldName];
+  }
+
+  display(value: unknown, path: ResourceFieldPath<APIResources>) {
+    const field = this.getField(path);
+    return field != null ? this.fieldDisplay(value, field) : null;
+  }
+
+  getDisplayFn(path: ResourceFieldPath<APIResources>) {
+    const field = this.getField(path);
+    return field != null ? this.getFieldDisplayFn(field) : null;
   }
 
   getFormField<Props extends Record<string, unknown> = Record<string, unknown>, RenderResult = any>(
     props: Props,
-    field: APIResourceField<FieldKey, FieldObjectKey>,
+    path: ResourceFieldPath<APIResources>,
+  ): RenderResult | null {
+    const field = this.getField(path);
+    return field != null ? this.getFieldFormField(props, field) : null;
+  }
+
+  getValidation(path: ResourceFieldPath<APIResources>): FieldValidation | null {
+    const field = this.getField(path);
+    return field != null ? this.getFieldValidation(field) : null;
+  }
+
+  fieldDisplay(value: unknown, field: APIResourceField<FieldKinds, FieldObjectKinds> | FieldKinds) {
+    return this.getFieldDisplayFn(field)(value);
+  }
+
+  getFieldDisplayFn(field: APIResourceField<FieldKinds, FieldObjectKinds> | FieldKinds) {
+    const fieldInstance =
+      typeof field === 'string'
+        ? this.fieldByKind[field] != null
+          ? new this.fieldByKind[field]!({ kind: field as FieldKinds, label: '', name: '' })
+          : new this.DefaultField({ kind: field as FieldKinds, label: '', name: '' })
+        : this.getFieldInstance(field);
+    return fieldInstance.display;
+  }
+
+  getFieldFormField<Props extends Record<string, unknown> = Record<string, unknown>, RenderResult = any>(
+    props: Props,
+    field: APIResourceField<FieldKinds, FieldObjectKinds>,
   ): RenderResult {
     const fieldInstance = this.getFieldInstance(field);
     return fieldInstance.getFormField?.(props) ?? this.formAdapter?.(fieldInstance, props);
   }
 
-  getValidation(field: APIResourceField<FieldKey, FieldObjectKey>): FieldValidation | null {
+  getFieldValidation(field: APIResourceField<FieldKinds, FieldObjectKinds>): FieldValidation | null {
     const fieldInstance = this.getFieldInstance(field);
     return fieldInstance.getValidation?.() ?? this.validationAdapter?.(fieldInstance);
   }

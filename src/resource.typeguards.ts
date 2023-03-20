@@ -19,20 +19,21 @@ export const isFieldObject = <
   FieldObjectKey extends string = string,
 >(
   field: ResourceField<FieldKey, FieldObjectKey>,
-): field is FieldObject<FieldKey, FieldObjectKey> => 'fields' in field;
+): field is FieldObject<FieldObjectKey> => 'fields' in field;
 
 export const isAPIField = <
   FieldKey extends string = string,
   FieldObjectKey extends string = string,
+  ObjectKind extends PropertyKey = string,
 >(
-  field: APIResourceField<FieldKey, FieldObjectKey>,
+  field: APIResourceField<FieldKey, FieldObjectKey, ObjectKind>,
 ): field is APIField<FieldKey> => 'kind' in field;
 export const isAPIFieldObject = <
   FieldKey extends string = string,
   FieldObjectKey extends string = string,
 >(
   field: APIResourceField<FieldKey, FieldObjectKey>,
-): field is APIFieldObject<FieldKey, FieldObjectKey> => 'fields' in field;
+): field is APIFieldObject<FieldObjectKey> => 'fields' in field;
 
 export const isNumberValidation = (
   validation: FieldValidation,

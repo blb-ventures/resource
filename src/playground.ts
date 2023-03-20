@@ -1,11 +1,9 @@
 import { FieldImpl, ResourcesManager } from './resource';
-import { APIFieldObject, FieldConstructor } from './resource.interface';
+import { FieldConstructor } from './resource.interface';
+import { filterResources } from './util';
 
-const exampleObject: APIFieldObject = {
-  name: 'User',
-  label: 'User',
-  objKind: 'OBJECT',
-  fields: {
+const exampleObject = {
+  User: {
     id: {
       name: 'id',
       kind: 'ID',
@@ -61,8 +59,30 @@ const exampleObject: APIFieldObject = {
       label: 'Birthday',
       validation: { required: false },
     },
+    sessions: {
+      name: 'sessions',
+      label: 'Sessions',
+      objKind: 'OBJECT_LIST',
+      objType: 'Session',
+    },
   },
-};
+  Session: {
+    user: {
+      name: 'user',
+      label: 'User',
+      objKind: 'OBJECT',
+      objType: 'User',
+    },
+  },
+  Other: {
+    name: {
+      name: 'name',
+      kind: 'STRING',
+      label: 'Name',
+      validation: { required: true, minLength: 0, maxLength: 150 },
+    },
+  },
+} as const;
 
 class BaseField extends FieldImpl {
   getFormField() {
@@ -70,7 +90,9 @@ class BaseField extends FieldImpl {
   }
 }
 
-const resourceManager = new ResourcesManager<string>({
+const filteredObject = filterResources(exampleObject, ['User', 'Session']);
+
+const resourceManager = new ResourcesManager(filteredObject, {
   fieldByKind: {
     ID: BaseField as FieldConstructor,
     STRING: BaseField as FieldConstructor,
@@ -82,26 +104,8 @@ const resourceManager = new ResourcesManager<string>({
   defaultField: BaseField as FieldConstructor,
 });
 
-const idField = resourceManager.getFieldInstance(exampleObject);
-console.log('OBJECT ID FIELD', idField);
-
-if (!Array.isArray(exampleObject.fields)) {
-  const exampleArray = {
-    name: 'User',
-    label: 'User',
-    objKind: 'OBJECT',
-    fields: [
-      exampleObject.fields.id,
-      //                   ^?
-      exampleObject.fields.name,
-      exampleObject.fields.firstName,
-      exampleObject.fields.lastName,
-      exampleObject.fields.isAdmin,
-      exampleObject.fields.phone,
-      exampleObject.fields.createdAt,
-      exampleObject.fields.birthday,
-    ],
-  };
-  const idField = resourceManager.getFieldInstance(exampleArray);
-  console.log('ARRAY ID FIELD', idField);
+console.log(resourceManager.display(true, 'User.isAdmin'));
+const firstName = resourceManager.getField('Session.user.firstName');
+if (firstName != null) {
+  console.log(resourceManager.fieldDisplay('John Doe', firstName));
 }
