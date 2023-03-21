@@ -39,9 +39,7 @@ export type APIResource<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
   ResourceKey extends string = string,
-> =
-  | Record<string, APIResourceField<FieldKinds, FieldObjectKinds, ResourceKey>>
-  | APIResourceField<FieldKinds, FieldObjectKinds, ResourceKey>[];
+> = Record<string, APIResourceField<FieldKinds, FieldObjectKinds, ResourceKey>>;
 
 export interface APIField<FieldKinds extends string = string> {
   choices?: FieldChoice[] | null;
@@ -132,12 +130,6 @@ export type ResourceField<
 > =
   | Field<FieldKinds, Props, RenderResult, ValidationResult>
   | FieldObject<FieldObjectKinds, ResourcesKeys, Props, RenderResult, ValidationResult>;
-
-export type ResourceFieldOrKey<
-  FieldKinds extends string = string,
-  FieldObjectKinds extends string = string,
-  ResourcesKeys extends string = string,
-> = ResourceField<FieldKinds, FieldObjectKinds, ResourcesKeys> | FieldKinds;
 
 // Constructors
 

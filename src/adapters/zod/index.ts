@@ -14,10 +14,10 @@ import {
 } from 'zod';
 import {
   DecimalFieldValidation,
+  Field,
   FieldValidation,
   IntFieldValidation,
   ResourceField,
-  ResourceFieldOrKey,
   StringFieldValidation,
   ValidationAdapter,
 } from '../../resource.interface';
@@ -84,23 +84,14 @@ export type ValidationZodKinds =
   | ZodOptional<any>
   | ZodArray<ValidationZodKinds>;
 
-export interface ZodAdapterOptions<
-  FieldKinds extends string = FieldKind,
-  FieldObjectKinds extends string = string,
-> {
+export interface ZodAdapterOptions<FieldKinds extends string, FieldObjectKinds extends string> {
   // Defines base validation for the kinds. Other validations will be added on top of it to handle
   // multiple (array) and type validation requirements
-  rulesByKind?: Record<
-    FieldKinds,
-    (field: ResourceFieldOrKey<FieldKinds, FieldObjectKinds>) => ZodTypeAny
-  >;
+  rulesByKind?: Record<string, (field: Field<FieldKinds, FieldObjectKinds>) => ZodTypeAny>;
   // Defines final validation for the kinds. Needs to handle multiple (array) and type validation.
-  rulesByKindRaw?: Record<
-    FieldKinds,
-    (field: ResourceFieldOrKey<FieldKinds, FieldObjectKinds>) => ZodTypeAny
-  >;
+  rulesByKindRaw?: Record<string, (field: Field<FieldKinds, FieldObjectKinds>) => ZodTypeAny>;
   acceptedImageMimeType?: string[];
-  localization: {
+  localization?: {
     required: string;
     invalidType: string;
     maxValue?: (val: number) => string;
@@ -116,11 +107,7 @@ export interface ZodAdapterOptions<
 }
 
 export const zodAdapter =
-  <
-    FieldKinds extends string = string,
-    FieldObjectKinds extends string = string,
-    ResourcesKeys extends string = string,
-  >(
+  <FieldKinds extends string, FieldObjectKinds extends string, ResourcesKeys extends string>(
     options?: ZodAdapterOptions<FieldKinds, FieldObjectKinds>,
   ): ValidationAdapter<FieldKinds, FieldObjectKinds, ResourcesKeys, any, any, ZodTypeAny> =>
   (field, context) => {
@@ -158,7 +145,7 @@ export const getFieldRules = <
   }
 
   const baseZod =
-    options?.localization.invalidType != null || options?.localization.required != null
+    options?.localization?.invalidType != null || options?.localization?.required != null
       ? {
           invalid_type_error: options.localization.invalidType,
           required_error: options.localization.required,
@@ -207,35 +194,35 @@ const getFieldKindRules = <
   options?: ZodAdapterOptions<FieldKey, FieldObjectKey>,
 ) => {
   const baseZod =
-    options?.localization.invalidType != null || options?.localization.required != null
+    options?.localization?.invalidType != null || options?.localization?.required != null
       ? {
-          invalid_type_error: options.localization.invalidType,
-          required_error: options.localization.required,
+          invalid_type_error: options.localization?.invalidType,
+          required_error: options.localization?.required,
         }
       : undefined;
   return {
-    [FIELD_KIND.Email]: z.string(baseZod).email(options?.localization.email),
+    [FIELD_KIND.Email]: z.string(baseZod).email(options?.localization?.email),
     [FIELD_KIND.Date]: z.date(baseZod),
     [FIELD_KIND.Datetime]: z.date(baseZod),
     [FIELD_KIND.Time]: z.date(baseZod),
-    [FIELD_KIND.Url]: z.string(baseZod).url(options?.localization.url),
+    [FIELD_KIND.Url]: z.string(baseZod).url(options?.localization?.url),
     [FIELD_KIND.Boolean]: z.boolean(baseZod),
     [FIELD_KIND.Id]: z
       .any()
       .transform(it => (typeof it === 'string' ? it : it?.id ?? null))
-      .refine((it: unknown) => it != null, options?.localization.invalidType),
+      .refine((it: unknown) => it != null, options?.localization?.invalidType),
     [FIELD_KIND.Image]: z
       .any()
       .refine(isRequired(validation))
-      .refine(input => input == null || isBrowserFile(input), options?.localization.invalidType)
+      .refine(input => input == null || isBrowserFile(input), options?.localization?.invalidType)
       .refine(
         isSupportedImage(options?.acceptedImageMimeType ?? DEFAULT_ACCEPTED_IMAGE_MIME_TYPES),
-        options?.localization.allowedImageFormat,
+        options?.localization?.allowedImageFormat,
       ),
     [FIELD_KIND.File]: z
       .any()
       .refine(isRequired(validation))
-      .refine(file => isBrowserFile(file), options?.localization.invalidType),
+      .refine(file => isBrowserFile(file), options?.localization?.invalidType),
   };
 };
 
@@ -246,16 +233,16 @@ export const getValidationUtils = <
   options?: ZodAdapterOptions<FieldKey, FieldObjectKey>,
 ) => {
   const addMinLength = (schema: ZodString, min: number, message?: string) =>
-    schema.min(min, message ?? options?.localization.minLength?.(min));
+    schema.min(min, message ?? options?.localization?.minLength?.(min));
   const addMaxLength = (schema: ZodString, max: number, message?: string) =>
-    schema.max(max, message ?? options?.localization.maxLength?.(max));
+    schema.max(max, message ?? options?.localization?.maxLength?.(max));
   const addMinValue = (schema: ZodNumber, min: number, message?: string) =>
-    schema.min(min, message ?? options?.localization.minValue?.(min));
+    schema.min(min, message ?? options?.localization?.minValue?.(min));
   const addMaxValue = (schema: ZodNumber, max: number, message?: string) =>
-    schema.max(max, message ?? options?.localization.maxValue?.(max));
+    schema.max(max, message ?? options?.localization?.maxValue?.(max));
   const addNullish = <T extends ZodTypeAny>(schema: T) => schema.nullish();
   const addStringRequired = (schema: ZodString, message?: string) =>
-    schema.min(1, message ?? options?.localization.required);
+    schema.min(1, message ?? options?.localization?.required);
   const addRequired = (required: boolean, schema: ValidationZodKinds) => {
     if (schema instanceof ZodString && required) return addStringRequired(schema);
     if (!required) return addNullish(schema);

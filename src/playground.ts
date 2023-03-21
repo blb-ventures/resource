@@ -1,3 +1,5 @@
+import { z } from 'zod';
+import { zodAdapter } from './adapters';
 import { FieldImpl, ResourcesManager } from './resource';
 import { FieldConstructor } from './resource.interface';
 import { filterResources } from './util';
@@ -102,6 +104,11 @@ const resourceManager = new ResourcesManager(filteredObject, {
     DATE: BaseField as FieldConstructor,
   },
   defaultField: BaseField as FieldConstructor,
+  validationAdapter: zodAdapter({
+    rulesByKind: {
+      ID: _ => z.string(),
+    },
+  }),
 });
 
 console.log(resourceManager.display(true, 'User.isAdmin'));

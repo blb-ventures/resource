@@ -6,4 +6,7 @@
     "declarationMap": true,
     "emitDeclarationOnly": true
   },
+  "exclude": [
+    "./src/playground.ts"
+  ]
 }

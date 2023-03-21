@@ -9,5 +9,8 @@
     "declaration": true,
     "declarationMap": false,
     "sourceMap": false
-  }
+  },
+  "exclude": [
+    "./src/playground.ts"
+  ]
 }
