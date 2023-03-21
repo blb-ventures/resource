@@ -1,32 +1,32 @@
-export type FieldChoice = {
+export interface FieldChoice {
   group?: string | null;
   label: string;
   value: any;
-};
+}
 
-export type BaseFieldValidation = {
+export interface BaseFieldValidation {
   required: boolean;
-};
+}
 
-export type DecimalFieldValidation = {
+export interface DecimalFieldValidation {
   decimalPlaces?: number | null;
   maxDigits?: number | null;
   maxValue?: number | null;
   minValue?: number | null;
   required: boolean;
-};
+}
 
-export type IntFieldValidation = {
+export interface IntFieldValidation {
   maxValue?: number | null;
   minValue?: number | null;
   required: boolean;
-};
+}
 
-export type StringFieldValidation = {
+export interface StringFieldValidation {
   maxLength?: number | null;
   minLength?: number | null;
   required: boolean;
-};
+}
 
 export type FieldValidation =
   | BaseFieldValidation
@@ -38,9 +38,10 @@ export type FieldValidation =
 export type APIResource<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
+  ResourceKey extends string = string,
 > =
-  | Record<string, APIResourceField<FieldKinds, FieldObjectKinds>>
-  | APIResourceField<FieldKinds, FieldObjectKinds>[];
+  | Record<string, APIResourceField<FieldKinds, FieldObjectKinds, ResourceKey>>
+  | APIResourceField<FieldKinds, FieldObjectKinds, ResourceKey>[];
 
 export interface APIField<FieldKinds extends string = string> {
   choices?: FieldChoice[] | null;
@@ -56,21 +57,21 @@ export interface APIField<FieldKinds extends string = string> {
   validation?: FieldValidation;
 }
 
-export type APIFieldObject<
+export interface APIFieldObject<
   FieldObjectKinds extends string = string,
-  ObjectType extends PropertyKey = string,
-> = {
+  ResourceKey extends string = string,
+> {
   label: string;
   name: string;
   objKind: FieldObjectKinds;
-  objType: ObjectType;
-};
+  objType: ResourceKey;
+}
 
 export type APIResourceField<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
-  ObjectKind extends PropertyKey = string,
-> = APIField<FieldKinds> | APIFieldObject<FieldObjectKinds, ObjectKind>;
+  ResourceKey extends string = string,
+> = APIField<FieldKinds> | APIFieldObject<FieldObjectKinds, ResourceKey>;
 
 // Class Interfaces
 
@@ -106,6 +107,7 @@ export interface Field<
 
 export interface FieldObject<
   FieldObjectKinds extends string = string,
+  ResourcesKeys extends string = string,
   Props = any,
   RenderResult = any,
   ValidationResult = any,
@@ -113,7 +115,7 @@ export interface FieldObject<
   label: string;
   name: string;
   objKind: FieldObjectKinds;
-  objType: string;
+  objType: ResourcesKeys;
   display(value: unknown): string | null;
   getFormField?: (props: Props) => RenderResult | null;
   getValidation?: () => ValidationResult | null;
@@ -123,17 +125,19 @@ export interface FieldObject<
 export type ResourceField<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
+  ResourcesKeys extends string = string,
   Props = any,
   RenderResult = any,
   ValidationResult = any,
 > =
   | Field<FieldKinds, Props, RenderResult, ValidationResult>
-  | FieldObject<FieldObjectKinds, Props, RenderResult, ValidationResult>;
+  | FieldObject<FieldObjectKinds, ResourcesKeys, Props, RenderResult, ValidationResult>;
 
 export type ResourceFieldOrKey<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
-> = ResourceField<FieldKinds, FieldObjectKinds> | FieldKinds;
+  ResourcesKeys extends string = string,
+> = ResourceField<FieldKinds, FieldObjectKinds, ResourcesKeys> | FieldKinds;
 
 // Constructors
 
@@ -147,11 +151,12 @@ export type FieldConstructor = new <
 
 export type FieldObjectConstructor<
   FieldObjectKinds extends string = string,
-  ObjectKind extends PropertyKey = string,
+  ResourcesKeys extends string = string,
   Props extends Record<string, unknown> = Record<string, unknown>,
   RenderResult = any,
-> = new (field: APIFieldObject<FieldObjectKinds, ObjectKind>) => FieldObject<
+> = new (field: APIFieldObject<FieldObjectKinds, ResourcesKeys>) => FieldObject<
   FieldObjectKinds,
+  ResourcesKeys,
   Props,
   RenderResult
 >;
@@ -161,33 +166,85 @@ export type FieldObjectConstructor<
 export type DisplayAdapter<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
+  ResourcesKeys extends string = string,
   Props = any,
   RenderResult = any,
   ValidationResult = any,
 > = (
-  field: ResourceField<FieldKinds, FieldObjectKinds, Props, RenderResult, ValidationResult>,
+  field: ResourceField<
+    FieldKinds,
+    FieldObjectKinds,
+    ResourcesKeys,
+    Props,
+    RenderResult,
+    ValidationResult
+  >,
   value: unknown,
 ) => string | null;
 
 export type FormAdapter<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
+  ResourcesKeys extends string = string,
   Props = any,
   RenderResult = any,
   ValidationResult = any,
 > = (
-  field: ResourceField<FieldKinds, FieldObjectKinds, Props, RenderResult, ValidationResult>,
+  field: ResourceField<
+    FieldKinds,
+    FieldObjectKinds,
+    ResourcesKeys,
+    Props,
+    RenderResult,
+    ValidationResult
+  >,
   props: Props,
 ) => RenderResult | null;
+
+export interface ValidationContext<
+  FieldKinds extends string = string,
+  FieldObjectKinds extends string = string,
+  ResourcesKeys extends string = string,
+  Props = any,
+  RenderResult = any,
+  ValidationResult = any,
+> {
+  getResourceFields: (
+    resource: ResourcesKeys,
+  ) => ResourceField<
+    FieldKinds,
+    FieldObjectKinds,
+    ResourcesKeys,
+    Props,
+    RenderResult,
+    ValidationResult
+  >[];
+}
 
 export type ValidationAdapter<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
+  ResourcesKeys extends string = string,
   Props = any,
   RenderResult = any,
   ValidationResult = any,
 > = (
-  field: ResourceField<FieldKinds, FieldObjectKinds, Props, RenderResult, ValidationResult>,
+  field: ResourceField<
+    FieldKinds,
+    FieldObjectKinds,
+    ResourcesKeys,
+    Props,
+    RenderResult,
+    ValidationResult
+  >,
+  context: ValidationContext<
+    FieldKinds,
+    FieldObjectKinds,
+    ResourcesKeys,
+    Props,
+    RenderResult,
+    ValidationResult
+  >,
 ) => ValidationResult | null;
 
 // Helpers
@@ -197,7 +254,7 @@ export type ResourceFieldObjectPath<
   Key extends keyof T & string = keyof T & string,
   SubKey extends keyof T[Key] = keyof T[Key],
 > = SubKey extends string
-  ? T[Key][SubKey] extends { objType: keyof T; [key: PropertyKey]: any }
+  ? T[Key][SubKey] extends { objType: keyof T; [key: string]: any }
     ? keyof T[T[Key][SubKey]['objType']] extends string
       ? `${Key}.${SubKey}.${keyof T[T[Key][SubKey]['objType']]}`
       : never

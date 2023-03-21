@@ -17,6 +17,6 @@ module.exports = [
         sourceMap: false,
       }),
     ],
-    // external: [],
+    external: ['react', 'react/jsx-runtime', 'react-hook-form', 'zod'],
   },
 ];

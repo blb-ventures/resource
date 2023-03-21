@@ -1,6 +1,6 @@
 const path = require('path');
 const confusingBrowserGlobals = require('confusing-browser-globals');
-const tsconfigPath = path.resolve(__dirname, './configs/tsconfig.esm.json');
+const tsconfigPath = path.resolve(__dirname, './tsconfig.esm.json');
 // const reactPlugin = require('eslint-plugin-react');
 // const reactHooksPlugin = require('eslint-plugin-react-hooks');
 const importPlugin = require('eslint-plugin-import');
@@ -23,7 +23,7 @@ module.exports = {
     'prettier': prettierPlugin,
   },
   files: ['**/*.{ts,tsx}'],
-  ignores: ['node_modules', 'lib'],
+  ignores: ['node_modules', 'lib', 'src/playground.ts'],
   languageOptions: {
     // ...reactRecommended.languageOptions,
     ecmaVersion: 'latest',
@@ -166,11 +166,7 @@ module.exports = {
         },
       },
     ],
-    '@typescript-eslint/lines-between-class-members': [
-      'error',
-      'always',
-      { exceptAfterSingleLine: false },
-    ],
+    '@typescript-eslint/lines-between-class-members': 'off',
     '@typescript-eslint/no-extra-parens': [
       'off',
       'all',
