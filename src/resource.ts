@@ -173,6 +173,7 @@ export class ResourcesManager<
     const resource = this.resources[resourceName as ResourceKeys];
     if (fieldName == null) return null;
     const field = resource[fieldName];
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (subFieldName == null || field == null || isAPIField(field)) return field;
     const refType = this.resources[field.objType as ResourceKeys];
     return Array.isArray(refType)

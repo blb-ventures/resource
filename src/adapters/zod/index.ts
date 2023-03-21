@@ -125,8 +125,9 @@ export const zodAdapter =
   ): ValidationAdapter<FieldKinds, FieldObjectKinds, ResourcesKeys, any, any, ZodTypeAny> =>
   (field, context) => {
     if (isField(field)) return getFieldRules(field, options);
-    if (isFieldObject(field))
+    if (isFieldObject(field)) {
       return getFieldRecordRules(context.getResourceFields(field.objType), options);
+    }
     return null;
   };
 
@@ -146,11 +147,11 @@ export const getFieldRules = <
     return z.any();
   }
 
-  const fieldValidation = validation ?? field?.validation;
+  const fieldValidation = validation ?? field.validation;
   if (fieldValidation == null) return z.any();
 
   if (isNumberValidation(fieldValidation)) {
-    return utils.addMultipleValidation(utils.getNumberValidation(fieldValidation), field?.multiple);
+    return utils.addMultipleValidation(utils.getNumberValidation(fieldValidation), field.multiple);
   }
   if (options?.rulesByKindRaw != null && field.kind in options.rulesByKindRaw) {
     return options.rulesByKindRaw[field.kind](field);
@@ -175,7 +176,7 @@ export const getFieldRules = <
   if (schema instanceof ZodString && isStringValidation(fieldValidation)) {
     schema = utils.getStringValidation(schema, fieldValidation);
   }
-  return utils.addMultipleValidation(schema, field?.multiple);
+  return utils.addMultipleValidation(schema, field.multiple);
 };
 
 export const getFieldRecordRules = <
