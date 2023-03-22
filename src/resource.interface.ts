@@ -42,7 +42,7 @@ export type APIResource<
 > = Record<string, APIResourceField<FieldKinds, FieldObjectKinds, ResourceKey>>;
 
 export interface APIField<FieldKinds extends string = string> {
-  choices?: FieldChoice[] | null;
+  choices?: readonly FieldChoice[] | FieldChoice[] | null;
   defaultValue?: any;
   filterable?: boolean;
   helpText?: string | null;

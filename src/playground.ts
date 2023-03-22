@@ -20,19 +20,6 @@ const exampleObject = {
       label: 'Name',
       validation: { required: true },
     },
-    firstName: {
-      name: 'firstName',
-      kind: 'STRING',
-      label: 'First name',
-      orderable: true,
-      validation: { required: true, minLength: 0, maxLength: 150 },
-    },
-    lastName: {
-      name: 'lastName',
-      kind: 'STRING',
-      label: 'Last name',
-      validation: { required: true, minLength: 0, maxLength: 150 },
-    },
     isAdmin: {
       name: 'isAdmin',
       kind: 'BOOLEAN',
@@ -66,6 +53,37 @@ const exampleObject = {
       label: 'Sessions',
       objKind: 'OBJECT_LIST',
       objType: 'Session',
+    },
+    status: {
+      name: 'status',
+      kind: 'STRING',
+      label: 'Status',
+      orderable: true,
+      filterable: true,
+      choices: [
+        {
+          label: 'Initial',
+          value: 'initial',
+        },
+        {
+          label: 'Ongoing',
+          value: 'ongoing',
+        },
+        {
+          label: 'Finished',
+          value: 'finished',
+        },
+        {
+          label: 'Transferred',
+          value: 'transferred',
+        },
+      ],
+      defaultValue: 'initial',
+      validation: {
+        required: true,
+        minLength: 0,
+        maxLength: 11,
+      },
     },
   },
   Session: {
@@ -112,7 +130,7 @@ const resourceManager = new ResourcesManager(filteredObject, {
 });
 
 console.log(resourceManager.display(true, 'User.isAdmin'));
-const firstName = resourceManager.getField('Session.user.firstName');
+const firstName = resourceManager.getField('Session.user.name');
 if (firstName != null) {
   console.log(resourceManager.fieldDisplay('John Doe', firstName));
 }
