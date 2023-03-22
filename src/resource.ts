@@ -40,7 +40,7 @@ export class FieldImpl<
   validation?: FieldValidation;
 
   constructor(field: APIField<FieldKinds>) {
-    this.choices = field.choices;
+    this.choices = field.choices?.slice();
     this.defaultValue = field.defaultValue;
     this.filterable = field.filterable;
     this.helpText = field.helpText;
