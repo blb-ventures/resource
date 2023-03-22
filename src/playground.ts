@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { zodAdapter } from './adapters';
-import { FieldImpl, ResourcesManager } from './resource';
-import { FieldConstructor } from './resource.interface';
+import { FieldImpl, FieldObjectImpl, ResourcesManager } from './resource';
+import { FieldConstructor, FieldObjectConstructor } from './resource.interface';
 import { filterResources } from './util';
 
 const exampleObject = {
@@ -110,6 +110,8 @@ class BaseField extends FieldImpl {
   }
 }
 
+class BaseObjectField extends FieldObjectImpl {}
+
 const filteredObject = filterResources(exampleObject, ['User', 'Session']);
 
 const resourceManager = new ResourcesManager(filteredObject, {
@@ -121,8 +123,12 @@ const resourceManager = new ResourcesManager(filteredObject, {
     DATETIME: BaseField as FieldConstructor,
     DATE: BaseField as FieldConstructor,
   },
+  fieldObjectByKind: {
+    OBJECT: BaseObjectField as FieldObjectConstructor,
+    OBJECT_LIST: BaseObjectField as FieldObjectConstructor,
+  },
   defaultField: BaseField as FieldConstructor,
-  validationAdapter: zodAdapter({
+  validationAdapter: zodAdapter<keyof typeof filteredObject>({
     rulesByKind: {
       ID: _ => z.string(),
     },
@@ -134,3 +140,18 @@ const firstName = resourceManager.getField('Session.user.name');
 if (firstName != null) {
   console.log(resourceManager.fieldDisplay('John Doe', firstName));
 }
+
+const sessionUser = resourceManager.getField('Session.user');
+const sessionUserField = resourceManager.getFieldInstance(sessionUser);
+console.log(sessionUserField.name);
+
+resourceManager.getDisplayFn('User.birthday');
+resourceManager.getFieldDisplayFn(firstName);
+resourceManager.getFieldFormField({}, firstName);
+resourceManager.getFieldInstance(firstName);
+resourceManager.getFieldValidation(firstName);
+resourceManager.getFormField({}, 'User.phone');
+resourceManager.getKindDisplay('ID', 'User ID');
+resourceManager.getResourceFields('Session');
+resourceManager.getValidation('User.status');
+resourceManager.kindDisplay(true, 'BOOLEAN');

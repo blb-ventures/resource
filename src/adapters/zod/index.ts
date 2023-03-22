@@ -107,13 +107,20 @@ export interface ZodAdapterOptions<FieldKinds extends string, FieldObjectKinds e
 }
 
 export const zodAdapter =
-  <FieldKinds extends string, FieldObjectKinds extends string, ResourcesKeys extends string>(
+  <
+    ResourcesKeys extends string,
+    FieldKinds extends string = string,
+    FieldObjectKinds extends string = string,
+  >(
     options?: ZodAdapterOptions<FieldKinds, FieldObjectKinds>,
   ): ValidationAdapter<FieldKinds, FieldObjectKinds, ResourcesKeys, any, any, ZodTypeAny> =>
   (field, context) => {
     if (isField(field)) return getFieldRules(field, options);
     if (isFieldObject(field)) {
-      return getFieldRecordRules(context.getResourceFields(field.objType), options);
+      return getFieldRecordRules(
+        context.getResourceFields(field.objType as ResourcesKeys),
+        options,
+      );
     }
     return null;
   };
@@ -196,8 +203,8 @@ const getFieldKindRules = <
   const baseZod =
     options?.localization?.invalidType != null || options?.localization?.required != null
       ? {
-          invalid_type_error: options.localization?.invalidType,
-          required_error: options.localization?.required,
+          invalid_type_error: options.localization.invalidType,
+          required_error: options.localization.required,
         }
       : undefined;
   return {

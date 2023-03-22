@@ -95,65 +95,83 @@ export class FieldObjectImpl<
 
 // TODO: add support for custom field matcher
 export class ResourcesManager<
-  const APIResources extends Record<string, APIResource<FieldKinds, FieldObjectKinds>>,
-  FieldKinds extends string = string,
-  FieldObjectKinds extends string = string,
-  ResourceKeys extends keyof APIResource = keyof APIResource,
+  const APIResources extends Record<
+    string,
+    APIResource<FieldKinds, FieldObjectKinds, keyof APIResources & string>
+  >,
+  FieldByKind extends Record<FieldKinds, FieldConstructor | null | undefined>,
+  FieldObjectByKind extends Record<FieldObjectKinds, FieldObjectConstructor | null | undefined>,
+  FieldObjectKinds extends keyof FieldObjectByKind & string = keyof FieldObjectByKind & string,
+  FieldKinds extends keyof FieldByKind & string = keyof FieldByKind & string,
 > {
-  fieldByKind: Partial<Record<FieldKinds, FieldConstructor>>;
+  fieldByKind: FieldByKind;
+  fieldObjectByKind: FieldObjectByKind;
   private DefaultField: FieldConstructor;
-  private DefaultFieldObject: FieldObjectConstructor<FieldObjectKinds, ResourceKeys>;
-  private validationAdapter?: ValidationAdapter<FieldKinds, FieldObjectKinds, ResourceKeys>;
-  private formAdapter?: FormAdapter<FieldKinds, FieldObjectKinds, ResourceKeys>;
-  private resources: Resources<ResourceKeys, FieldKinds, FieldObjectKinds>;
+  private DefaultFieldObject: FieldObjectConstructor;
+  private validationAdapter?: ValidationAdapter<
+    FieldKinds,
+    FieldObjectKinds,
+    keyof APIResources & string
+  >;
+  private formAdapter?: FormAdapter<FieldKinds, FieldObjectKinds, keyof APIResources & string>;
+  resources: Resources<keyof APIResources & string, FieldKinds, FieldObjectKinds>;
 
   constructor(
     resources: APIResources,
     options: {
-      fieldByKind: Partial<Record<FieldKinds, FieldConstructor>>;
+      fieldByKind: FieldByKind;
+      fieldObjectByKind: FieldObjectByKind;
       defaultField?: FieldConstructor;
-      defaultFieldObject?: FieldObjectConstructor<FieldObjectKinds, ResourceKeys>;
-      validationAdapter?: ValidationAdapter<FieldKinds, FieldObjectKinds, ResourceKeys>;
-      formAdapter?: FormAdapter<FieldKinds, FieldObjectKinds, ResourceKeys>;
+      defaultFieldObject?: FieldObjectConstructor;
+      validationAdapter?: ValidationAdapter<
+        FieldKinds,
+        FieldObjectKinds,
+        keyof APIResources & string
+      >;
+      formAdapter?: FormAdapter<FieldKinds, FieldObjectKinds, keyof APIResources & string>;
     },
   ) {
     this.resources = this.processResources(resources);
     this.fieldByKind = options.fieldByKind;
+    this.fieldObjectByKind = options.fieldObjectByKind;
     this.DefaultField = options.defaultField ?? (FieldImpl as FieldConstructor);
     this.DefaultFieldObject =
-      options.defaultFieldObject ??
-      (FieldObjectImpl as FieldObjectConstructor<FieldObjectKinds, ResourceKeys>);
+      options.defaultFieldObject ?? (FieldObjectImpl as FieldObjectConstructor);
     this.validationAdapter = options.validationAdapter;
     this.formAdapter = options.formAdapter;
   }
 
   private processResources(
     apiResources: APIResources,
-  ): Resources<ResourceKeys, FieldKinds, FieldObjectKinds> {
+  ): Resources<keyof APIResources & string, FieldKinds, FieldObjectKinds> {
     const resources = Object.entries(apiResources).reduce<
-      Resources<ResourceKeys, FieldKinds, FieldObjectKinds>
-    >((acc, [resourceKey, resource]) => {
-      acc[resourceKey as ResourceKeys] = Object.entries(resource).reduce<
-        Record<string, ResourceField<FieldKinds, FieldObjectKinds, ResourceKeys>>
-      >(
-        (acc2, [fieldKey, field]) => ({
-          ...acc2,
-          [fieldKey]: this.getFieldInstance(
-            field as APIResourceField<FieldKinds, FieldObjectKinds, ResourceKeys>,
-          ),
-        }),
-        {},
-      );
-      return acc;
+      Resources<keyof APIResources & string, FieldKinds, FieldObjectKinds>
+    >((resourcesAcc, [resourceKey, resource]) => {
+      return {
+        ...resourcesAcc,
+        [resourceKey as keyof APIResources & string]: Object.entries(
+          resource as APIResource,
+        ).reduce<
+          Record<string, ResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>>
+        >(
+          (fields, [fieldKey, field]) => ({
+            ...fields,
+            [fieldKey]: this.getFieldInstance(
+              field as APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>,
+            ),
+          }),
+          {},
+        ),
+      };
       // eslint-disable-next-line @typescript-eslint/prefer-reduce-type-parameter
-    }, {} as Resources<ResourceKeys, FieldKinds, FieldObjectKinds>);
+    }, {} as Resources<keyof APIResources & string, FieldKinds, FieldObjectKinds>);
     return resources;
   }
 
   getFieldInstance<
     Props extends Record<string, unknown> = Record<string, unknown>,
     RenderResult = any,
-  >(field: APIResourceField<FieldKinds, FieldObjectKinds, ResourceKeys>) {
+  >(field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>) {
     if (isAPIField(field)) {
       const FieldClass =
         field.kind in this.fieldByKind && this.fieldByKind[field.kind as FieldKinds] != null
@@ -161,34 +179,37 @@ export class ResourcesManager<
           : this.DefaultField;
       return new FieldClass<FieldKinds, Props, RenderResult>(field);
     }
-    return new this.DefaultFieldObject(field);
+    const FieldObjectClass =
+      field.objKind in this.fieldObjectByKind &&
+      this.fieldObjectByKind[field.objKind as FieldObjectKinds] != null
+        ? this.fieldObjectByKind[field.objKind as FieldObjectKinds] ?? this.DefaultFieldObject
+        : this.DefaultFieldObject;
+    return new FieldObjectClass<FieldObjectKinds, keyof APIResources & string, Props, RenderResult>(
+      field,
+    );
   }
 
   getField(path: ResourceFieldPath<APIResources>) {
     const [resourceName, fieldName, subFieldName] = path.split('.') as [
       string,
-      string | null,
+      string,
       string | null,
     ];
-    const resource = this.resources[resourceName as ResourceKeys];
-    if (fieldName == null) return null;
+    const resource = this.resources[resourceName as keyof APIResources & string];
     const field = resource[fieldName];
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (subFieldName == null || field == null || isAPIField(field)) return field;
-    const refType = this.resources[field.objType as ResourceKeys];
-    return Array.isArray(refType)
-      ? refType.find(f => f.name === subFieldName)
-      : refType[subFieldName];
+    if (subFieldName == null || isAPIField(field)) return field;
+    const refType = this.resources[field.objType];
+    return refType[subFieldName];
   }
 
-  display(value: unknown, path: ResourceFieldPath<APIResources>) {
+  display(value: unknown, path: ResourceFieldPath<APIResources>): string | null {
     const field = this.getField(path);
-    return field != null ? this.fieldDisplay(value, field) : null;
+    return this.fieldDisplay(value, field);
   }
 
   getDisplayFn(path: ResourceFieldPath<APIResources>) {
     const field = this.getField(path);
-    return field != null ? this.getFieldDisplayFn(field) : null;
+    return this.getFieldDisplayFn(field);
   }
 
   getFormField<Props extends Record<string, unknown> = Record<string, unknown>, RenderResult = any>(
@@ -196,33 +217,35 @@ export class ResourcesManager<
     path: ResourceFieldPath<APIResources>,
   ): RenderResult | null {
     const field = this.getField(path);
-    return field != null ? this.getFieldFormField(props, field) : null;
+    return this.getFieldFormField(props, field);
   }
 
   getValidation(path: ResourceFieldPath<APIResources>): FieldValidation | null {
     const field = this.getField(path);
-    return field != null ? this.getFieldValidation(field) : null;
+    return this.getFieldValidation(field);
   }
 
-  kindDisplay(value: unknown, field: FieldKinds) {
-    return this.getKindDisplay(field)(value);
+  kindDisplay(value: unknown, kind: FieldKinds): string | null {
+    return this.getKindDisplay(kind)(value);
   }
 
   getKindDisplay(kind: FieldKinds, label?: string) {
     const fieldInstance = this.getFieldInstance({ kind, label: label ?? '', name: '' });
-    return fieldInstance.display;
+    return fieldInstance.display.bind(this);
   }
 
   fieldDisplay(
     value: unknown,
-    field: APIResourceField<FieldKinds, FieldObjectKinds, ResourceKeys>,
-  ) {
+    field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>,
+  ): string | null {
     return this.getFieldDisplayFn(field)(value);
   }
 
-  getFieldDisplayFn(field: APIResourceField<FieldKinds, FieldObjectKinds, ResourceKeys>) {
+  getFieldDisplayFn(
+    field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>,
+  ) {
     const fieldInstance = this.getFieldInstance(field);
-    return fieldInstance.display;
+    return fieldInstance.display.bind(this);
   }
 
   getFieldFormField<
@@ -230,14 +253,14 @@ export class ResourcesManager<
     RenderResult = any,
   >(
     props: Props,
-    field: APIResourceField<FieldKinds, FieldObjectKinds, ResourceKeys>,
+    field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>,
   ): RenderResult {
     const fieldInstance = this.getFieldInstance(field);
     return fieldInstance.getFormField?.(props) ?? this.formAdapter?.(fieldInstance, props);
   }
 
   getFieldValidation(
-    field: APIResourceField<FieldKinds, FieldObjectKinds, ResourceKeys>,
+    field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>,
   ): FieldValidation | null {
     const fieldInstance = this.getFieldInstance(field);
     return (
@@ -248,7 +271,9 @@ export class ResourcesManager<
     );
   }
 
-  getResourceFields(resource: ResourceKeys) {
+  getResourceFields(
+    resource: keyof APIResources & string,
+  ): ResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>[] {
     return Object.values(this.resources[resource]);
   }
 }

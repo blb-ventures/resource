@@ -80,27 +80,30 @@ export type APIResourceField<
 //   fieldsByKind: Partial<Record<FieldKinds, FieldConstructor>>;
 // }
 
+export interface BaseField<Props = any, RenderResult = any, ValidationResult = any> {
+  label: string;
+  name: string;
+  display(value: unknown): string | null;
+  getFormField?: (props: Props) => RenderResult | null;
+  getValidation?: () => ValidationResult | null;
+  validate?: () => null | false | string;
+}
+
 export interface Field<
   FieldKinds extends string = string,
   Props = any,
   RenderResult = any,
   ValidationResult = any,
-> {
+> extends BaseField<Props, RenderResult, ValidationResult> {
   choices?: FieldChoice[] | null;
   defaultValue?: any;
   filterable?: boolean;
   helpText?: string | null;
   kind: FieldKinds;
-  label: string;
   multiple?: boolean;
-  name: string;
   orderable?: boolean;
   resource?: string | null;
   validation?: FieldValidation;
-  display(value: unknown): string | null;
-  getFormField?: (props: Props) => RenderResult | null;
-  getValidation?: () => ValidationResult | null;
-  validate?: () => null | false | string;
 }
 
 export interface FieldObject<
@@ -109,15 +112,9 @@ export interface FieldObject<
   Props = any,
   RenderResult = any,
   ValidationResult = any,
-> {
-  label: string;
-  name: string;
+> extends BaseField<Props, RenderResult, ValidationResult> {
   objKind: FieldObjectKinds;
   objType: ResourcesKeys;
-  display(value: unknown): string | null;
-  getFormField?: (props: Props) => RenderResult | null;
-  getValidation?: () => ValidationResult | null;
-  validate?: () => null | false | string;
 }
 
 export type ResourceField<
@@ -141,17 +138,14 @@ export type FieldConstructor = new <
   field: APIField<FieldKinds>,
 ) => Field<FieldKinds, Props, RenderResult>;
 
-export type FieldObjectConstructor<
+export type FieldObjectConstructor = new <
   FieldObjectKinds extends string = string,
   ResourcesKeys extends string = string,
   Props extends Record<string, unknown> = Record<string, unknown>,
   RenderResult = any,
-> = new (field: APIFieldObject<FieldObjectKinds, ResourcesKeys>) => FieldObject<
-  FieldObjectKinds,
-  ResourcesKeys,
-  Props,
-  RenderResult
->;
+>(
+  field: APIFieldObject<FieldObjectKinds, ResourcesKeys>,
+) => FieldObject<FieldObjectKinds, ResourcesKeys, Props, RenderResult>;
 
 // Adapters
 
