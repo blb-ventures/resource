@@ -95,6 +95,8 @@ export class FieldObjectImpl<
 
 // TODO: add support for custom field matcher
 export class ResourcesManager<
+  ValidationResult,
+  RenderResult,
   FieldByKind extends Record<FieldKinds, FieldConstructor | null | undefined>,
   FieldObjectByKind extends Record<FieldObjectKinds, FieldObjectConstructor | null | undefined>,
   FieldObjectKinds extends keyof FieldObjectByKind & string,
@@ -111,9 +113,17 @@ export class ResourcesManager<
   private validationAdapter?: ValidationAdapter<
     FieldKinds,
     FieldObjectKinds,
-    keyof APIResources & string
+    keyof APIResources & string,
+    RenderResult,
+    ValidationResult
   >;
-  private formAdapter?: FormAdapter<FieldKinds, FieldObjectKinds, keyof APIResources & string>;
+  private formAdapter?: FormAdapter<
+    FieldKinds,
+    FieldObjectKinds,
+    keyof APIResources & string,
+    RenderResult,
+    ValidationResult
+  >;
   resources: Resources<keyof APIResources & string, FieldKinds, FieldObjectKinds>;
 
   constructor(
@@ -126,16 +136,24 @@ export class ResourcesManager<
       validationAdapter?: ValidationAdapter<
         FieldKinds,
         FieldObjectKinds,
-        keyof APIResources & string
+        keyof APIResources & string,
+        RenderResult,
+        ValidationResult
       >;
-      formAdapter?: FormAdapter<FieldKinds, FieldObjectKinds, keyof APIResources & string>;
+      formAdapter?: FormAdapter<
+        FieldKinds,
+        FieldObjectKinds,
+        keyof APIResources & string,
+        RenderResult,
+        ValidationResult
+      >;
     },
   ) {
     this.fieldByKind = options.fieldByKind;
     this.fieldObjectByKind = options.fieldObjectByKind;
     this.DefaultField = options.defaultField ?? (FieldImpl as FieldConstructor);
     this.DefaultFieldObject =
-    options.defaultFieldObject ?? (FieldObjectImpl as FieldObjectConstructor);
+      options.defaultFieldObject ?? (FieldObjectImpl as FieldObjectConstructor);
     this.validationAdapter = options.validationAdapter;
     this.formAdapter = options.formAdapter;
     this.resources = this.processResources(resources);
@@ -169,22 +187,21 @@ export class ResourcesManager<
   }
 
   getFieldInstance<
-    Props extends Record<string, unknown> = Record<string, unknown>,
-    RenderResult = any,
+    Props extends Record<string, unknown> = Record<string, unknown>
   >(field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>) {
     if (isAPIField(field)) {
       const FieldClass =
         field.kind in this.fieldByKind && this.fieldByKind[field.kind as FieldKinds] != null
           ? this.fieldByKind[field.kind as FieldKinds] ?? this.DefaultField
           : this.DefaultField;
-      return new FieldClass<FieldKinds, Props, RenderResult>(field);
+      return new FieldClass<FieldKinds, RenderResult, ValidationResult, Props>(field);
     }
     const FieldObjectClass =
       field.objKind in this.fieldObjectByKind &&
       this.fieldObjectByKind[field.objKind as FieldObjectKinds] != null
         ? this.fieldObjectByKind[field.objKind as FieldObjectKinds] ?? this.DefaultFieldObject
         : this.DefaultFieldObject;
-    return new FieldObjectClass<FieldObjectKinds, keyof APIResources & string, Props, RenderResult>(
+    return new FieldObjectClass<FieldObjectKinds, keyof APIResources & string, RenderResult, ValidationResult, Props>(
       field,
     );
   }
@@ -212,7 +229,7 @@ export class ResourcesManager<
     return this.getFieldDisplayFn(field);
   }
 
-  getFormField<Props extends Record<string, unknown> = Record<string, unknown>, RenderResult = any>(
+  getFormField<Props extends Record<string, unknown> = Record<string, unknown>>(
     props: Props,
     path: ResourceFieldPath<APIResources>,
   ): RenderResult | null {
@@ -220,7 +237,7 @@ export class ResourcesManager<
     return this.getFieldFormField(props, field);
   }
 
-  getValidation(path: ResourceFieldPath<APIResources>): FieldValidation | null {
+  getValidation(path: ResourceFieldPath<APIResources>): ValidationResult | null {
     const field = this.getField(path);
     return this.getFieldValidation(field);
   }
@@ -250,24 +267,23 @@ export class ResourcesManager<
 
   getFieldFormField<
     Props extends Record<string, unknown> = Record<string, unknown>,
-    RenderResult = any,
   >(
     props: Props,
     field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>,
-  ): RenderResult {
+  ): RenderResult | null {
     const fieldInstance = this.getFieldInstance(field);
-    return fieldInstance.getFormField?.(props) ?? this.formAdapter?.(fieldInstance, props);
+    return fieldInstance.getFormField?.(props) ?? this.formAdapter?.(fieldInstance, props) ?? null;
   }
 
   getFieldValidation(
     field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>,
-  ): FieldValidation | null {
+  ): ValidationResult | null {
     const fieldInstance = this.getFieldInstance(field);
     return (
       fieldInstance.getValidation?.() ??
       this.validationAdapter?.(fieldInstance, {
         getResourceFields: this.getResourceFields.bind(this),
-      })
+      }) ?? null
     );
   }
 

@@ -80,7 +80,7 @@ export type APIResourceField<
 //   fieldsByKind: Partial<Record<FieldKinds, FieldConstructor>>;
 // }
 
-export interface BaseField<Props = any, RenderResult = any, ValidationResult = any> {
+export interface BaseField<RenderResult = any, ValidationResult = any, Props = any> {
   label: string;
   name: string;
   display(value: unknown): string | null;
@@ -91,10 +91,10 @@ export interface BaseField<Props = any, RenderResult = any, ValidationResult = a
 
 export interface Field<
   FieldKinds extends string = string,
-  Props = any,
   RenderResult = any,
   ValidationResult = any,
-> extends BaseField<Props, RenderResult, ValidationResult> {
+  Props = any,
+> extends BaseField<RenderResult, ValidationResult, Props> {
   choices?: FieldChoice[] | null;
   defaultValue?: any;
   filterable?: boolean;
@@ -109,10 +109,10 @@ export interface Field<
 export interface FieldObject<
   FieldObjectKinds extends string = string,
   ResourcesKeys extends string = string,
-  Props = any,
   RenderResult = any,
   ValidationResult = any,
-> extends BaseField<Props, RenderResult, ValidationResult> {
+  Props = any,
+> extends BaseField<RenderResult, ValidationResult, Props> {
   objKind: FieldObjectKinds;
   objType: ResourcesKeys;
 }
@@ -121,49 +121,51 @@ export type ResourceField<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
   ResourcesKeys extends string = string,
-  Props = any,
   RenderResult = any,
   ValidationResult = any,
+  Props = any,
 > =
-  | Field<FieldKinds, Props, RenderResult, ValidationResult>
-  | FieldObject<FieldObjectKinds, ResourcesKeys, Props, RenderResult, ValidationResult>;
+  | Field<FieldKinds, RenderResult, ValidationResult, Props>
+  | FieldObject<FieldObjectKinds, ResourcesKeys, RenderResult, ValidationResult, Props>;
 
 // Constructors
 
 export type FieldConstructor = new <
   FieldKinds extends string = string,
-  Props extends Record<string, unknown> = Record<string, unknown>,
   RenderResult = any,
+  ValidationResult = any,
+  Props extends Record<string, unknown> = Record<string, unknown>,
 >(
   field: APIField<FieldKinds>,
-) => Field<FieldKinds, Props, RenderResult>;
+) => Field<FieldKinds, RenderResult, ValidationResult, Props>;
 
 export type FieldObjectConstructor = new <
   FieldObjectKinds extends string = string,
   ResourcesKeys extends string = string,
-  Props extends Record<string, unknown> = Record<string, unknown>,
   RenderResult = any,
+  ValidationResult = any,
+  Props extends Record<string, unknown> = Record<string, unknown>,
 >(
   field: APIFieldObject<FieldObjectKinds, ResourcesKeys>,
-) => FieldObject<FieldObjectKinds, ResourcesKeys, Props, RenderResult>;
 
-// Adapters
+  // Adapters,
+) => FieldObject<FieldObjectKinds, ResourcesKeys, RenderResult, ValidationResult, Props>;
 
 export type DisplayAdapter<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
   ResourcesKeys extends string = string,
-  Props = any,
   RenderResult = any,
   ValidationResult = any,
+  Props = any,
 > = (
   field: ResourceField<
     FieldKinds,
     FieldObjectKinds,
     ResourcesKeys,
-    Props,
     RenderResult,
-    ValidationResult
+    ValidationResult,
+    Props
   >,
   value: unknown,
 ) => string | null;
@@ -172,17 +174,17 @@ export type FormAdapter<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
   ResourcesKeys extends string = string,
-  Props = any,
   RenderResult = any,
   ValidationResult = any,
+  Props = any,
 > = (
   field: ResourceField<
     FieldKinds,
     FieldObjectKinds,
     ResourcesKeys,
-    Props,
     RenderResult,
-    ValidationResult
+    ValidationResult,
+    Props
   >,
   props: Props,
 ) => RenderResult | null;
@@ -191,9 +193,9 @@ export interface ValidationContext<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
   ResourcesKeys extends string = string,
-  Props = any,
   RenderResult = any,
   ValidationResult = any,
+  Props = any,
 > {
   getResourceFields: (
     resource: ResourcesKeys,
@@ -201,9 +203,9 @@ export interface ValidationContext<
     FieldKinds,
     FieldObjectKinds,
     ResourcesKeys,
-    Props,
     RenderResult,
-    ValidationResult
+    ValidationResult,
+    Props
   >[];
 }
 
@@ -211,25 +213,25 @@ export type ValidationAdapter<
   FieldKinds extends string = string,
   FieldObjectKinds extends string = string,
   ResourcesKeys extends string = string,
-  Props = any,
   RenderResult = any,
   ValidationResult = any,
+  Props = any,
 > = (
   field: ResourceField<
     FieldKinds,
     FieldObjectKinds,
     ResourcesKeys,
-    Props,
     RenderResult,
-    ValidationResult
+    ValidationResult,
+    Props
   >,
   context: ValidationContext<
     FieldKinds,
     FieldObjectKinds,
     ResourcesKeys,
-    Props,
     RenderResult,
-    ValidationResult
+    ValidationResult,
+    Props
   >,
 ) => ValidationResult | null;
 

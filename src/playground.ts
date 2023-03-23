@@ -135,24 +135,24 @@ const resourceManager = new ResourcesManager(filteredObject, {
   }),
 });
 
-console.log(resourceManager.display(true, 'User.isAdmin'));
+console.log('display', resourceManager.display(true, 'User.isAdmin'));
 const firstName = resourceManager.getField('Session.user.name');
 if (firstName != null) {
-  console.log(resourceManager.fieldDisplay('John Doe', firstName));
+  console.log('fieldDisplay', resourceManager.fieldDisplay('John Doe', firstName));
 }
 
 const sessionUser = resourceManager.getField('Session.user');
 const sessionUserField = resourceManager.getFieldInstance(sessionUser);
-console.log(sessionUserField.name);
+console.log('getField -> getFieldInstance -> name', sessionUserField.name);
 
-console.log(resourceManager.getDisplayFn('User.birthday'));
-console.log(resourceManager.getFieldDisplayFn(firstName));
-console.log(resourceManager.getFieldFormField({}, firstName));
-console.log(resourceManager.getFieldInstance(firstName));
-console.log(resourceManager.getFieldValidation(firstName));
-console.log(resourceManager.getFormField({}, 'User.phone'));
-console.log(resourceManager.getKindDisplay('ID', 'User ID'));
+console.log('getDisplayFn', resourceManager.getDisplayFn('User.birthday'));
+console.log('getFieldDisplayFn', resourceManager.getFieldDisplayFn(firstName));
+console.log('getFieldFormField', resourceManager.getFieldFormField({}, firstName));
+console.log('getFieldInstance', resourceManager.getFieldInstance(firstName));
+console.log('getFieldValidation', resourceManager.getFieldValidation(firstName));
+console.log('getFormField', resourceManager.getFormField({}, 'User.phone'));
+console.log('getKindDisplay', resourceManager.getKindDisplay('ID', 'User ID'));
 const sessionFields = resourceManager.getResourceFields('Session');
-console.log(sessionFields);
-console.log(resourceManager.getValidation('User.status'));
-console.log(resourceManager.kindDisplay(true, 'BOOLEAN'));
+console.log('getResourceFields', sessionFields);
+console.log('getValidation', resourceManager.getValidation('User.status'));
+console.log('kindDisplay', resourceManager.kindDisplay(true, 'BOOLEAN'));
