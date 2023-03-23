@@ -131,14 +131,14 @@ export class ResourcesManager<
       formAdapter?: FormAdapter<FieldKinds, FieldObjectKinds, keyof APIResources & string>;
     },
   ) {
-    this.resources = this.processResources(resources);
     this.fieldByKind = options.fieldByKind;
     this.fieldObjectByKind = options.fieldObjectByKind;
     this.DefaultField = options.defaultField ?? (FieldImpl as FieldConstructor);
     this.DefaultFieldObject =
-      options.defaultFieldObject ?? (FieldObjectImpl as FieldObjectConstructor);
+    options.defaultFieldObject ?? (FieldObjectImpl as FieldObjectConstructor);
     this.validationAdapter = options.validationAdapter;
     this.formAdapter = options.formAdapter;
+    this.resources = this.processResources(resources);
   }
 
   private processResources(
