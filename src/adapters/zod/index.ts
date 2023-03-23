@@ -174,11 +174,11 @@ export const getFieldRules = <
 };
 
 export const getFieldRecordRules = <
-  FieldKey extends string = FieldKind,
-  FieldObjectKey extends string = string,
+  FieldKinds extends string = FieldKind,
+  FieldObjectKinds extends string = string,
 >(
-  fields: ResourceField<FieldKey, FieldObjectKey>[],
-  options?: ZodAdapterOptions<FieldKey, FieldObjectKey>,
+  fields: ResourceField<FieldKinds, FieldObjectKinds>[],
+  options?: ZodAdapterOptions<FieldKinds, FieldObjectKinds>,
 ): ZodObject<ZodRawShape> =>
   z.object(
     fields.reduce<ZodRawShape>(
@@ -186,6 +186,22 @@ export const getFieldRecordRules = <
       {},
     ),
   );
+
+export const getFieldsRules = <
+  FieldKinds extends string = FieldKind,
+  FieldObjectKinds extends string = string,
+  ResourceKeys extends string = string,
+  RenderResult = any,
+  ValidationResult = ZodTypeAny,
+>(
+  fields: ResourceField<
+    FieldKinds,
+    FieldObjectKinds,
+    ResourceKeys,
+    RenderResult,
+    ValidationResult
+  >[],
+) => fields.reduce((acc, it) => ({ ...acc, [it.name]: getFieldRules(it) }), {} as ZodRawShape);
 
 export const isSupportedImage = (allowedImageFormat: string[]) => (input: unknown) =>
   input == null || (isBrowserFile(input) && allowedImageFormat.includes(input.type));
