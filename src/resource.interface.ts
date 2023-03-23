@@ -1,7 +1,7 @@
 export interface FieldChoice {
   group?: string | null;
   label: string;
-  value: any;
+  value: string;
 }
 
 export interface BaseFieldValidation {
