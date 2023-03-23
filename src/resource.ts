@@ -95,14 +95,14 @@ export class FieldObjectImpl<
 
 // TODO: add support for custom field matcher
 export class ResourcesManager<
+  FieldByKind extends Record<FieldKinds, FieldConstructor | null | undefined>,
+  FieldObjectByKind extends Record<FieldObjectKinds, FieldObjectConstructor | null | undefined>,
+  FieldObjectKinds extends keyof FieldObjectByKind & string,
+  FieldKinds extends keyof FieldByKind & string,
   const APIResources extends Record<
     string,
     APIResource<FieldKinds, FieldObjectKinds, keyof APIResources & string>
   >,
-  FieldByKind extends Record<FieldKinds, FieldConstructor | null | undefined>,
-  FieldObjectByKind extends Record<FieldObjectKinds, FieldObjectConstructor | null | undefined>,
-  FieldObjectKinds extends keyof FieldObjectByKind & string = keyof FieldObjectByKind & string,
-  FieldKinds extends keyof FieldByKind & string = keyof FieldByKind & string,
 > {
   fieldByKind: FieldByKind;
   fieldObjectByKind: FieldObjectByKind;

@@ -31,36 +31,36 @@ import {
 
 /* eslint-disable id-blacklist */
 export const FIELD_KIND = {
-  Boolean: 'BOOLEAN',
-  Currency: 'CURRENCY',
-  Date: 'DATE',
-  Datetime: 'DATETIME',
-  Decimal: 'DECIMAL',
-  Distance: 'DISTANCE',
-  Email: 'EMAIL',
-  File: 'FILE',
-  Float: 'FLOAT',
-  Geopoint: 'GEOPOINT',
-  Id: 'ID',
-  Image: 'IMAGE',
-  Int: 'INT',
-  Ip: 'IP',
-  Json: 'JSON',
-  LegalPersonDoc: 'LEGAL_PERSON_DOC',
-  Multiline: 'MULTILINE',
-  NaturalPersonDoc: 'NATURAL_PERSON_DOC',
-  Password: 'PASSWORD',
-  Percent: 'PERCENT',
-  Phone: 'PHONE',
-  Point: 'POINT',
-  Polygon: 'POLYGON',
-  PostalCode: 'POSTAL_CODE',
-  String: 'STRING',
-  StringList: 'STRING_LIST',
-  Time: 'TIME',
-  Timedelta: 'TIMEDELTA',
-  Url: 'URL',
-  Uuid: 'UUID',
+  BOOLEAN: 'BOOLEAN',
+  CURRENCY: 'CURRENCY',
+  DATE: 'DATE',
+  DATETIME: 'DATETIME',
+  DECIMAL: 'DECIMAL',
+  DISTANCE: 'DISTANCE',
+  EMAIL: 'EMAIL',
+  FILE: 'FILE',
+  FLOAT: 'FLOAT',
+  GEOPOINT: 'GEOPOINT',
+  ID: 'ID',
+  IMAGE: 'IMAGE',
+  INT: 'INT',
+  IP: 'IP',
+  JSON: 'JSON',
+  LEGAL_PERSON_DOC: 'LEGAL_PERSON_DOC',
+  MULTILINE: 'MULTILINE',
+  NATURAL_PERSON_DOC: 'NATURAL_PERSON_DOC',
+  PASSWORD: 'PASSWORD',
+  PERCENT: 'PERCENT',
+  PHONE: 'PHONE',
+  POINT: 'POINT',
+  POLYGON: 'POLYGON',
+  POSTAL_CODE: 'POSTAL_CODE',
+  STRING: 'STRING',
+  STRING_LIST: 'STRING_LIST',
+  TIME: 'TIME',
+  TIMEDELTA: 'TIMEDELTA',
+  URL: 'URL',
+  UUID: 'UUID',
 };
 
 export type FieldKind = keyof typeof FIELD_KIND;
@@ -208,17 +208,17 @@ const getFieldKindRules = <
         }
       : undefined;
   return {
-    [FIELD_KIND.Email]: z.string(baseZod).email(options?.localization?.email),
-    [FIELD_KIND.Date]: z.date(baseZod),
-    [FIELD_KIND.Datetime]: z.date(baseZod),
-    [FIELD_KIND.Time]: z.date(baseZod),
-    [FIELD_KIND.Url]: z.string(baseZod).url(options?.localization?.url),
-    [FIELD_KIND.Boolean]: z.boolean(baseZod),
-    [FIELD_KIND.Id]: z
+    [FIELD_KIND.EMAIL]: z.string(baseZod).email(options?.localization?.email),
+    [FIELD_KIND.DATE]: z.date(baseZod),
+    [FIELD_KIND.DATETIME]: z.date(baseZod),
+    [FIELD_KIND.TIME]: z.date(baseZod),
+    [FIELD_KIND.URL]: z.string(baseZod).url(options?.localization?.url),
+    [FIELD_KIND.BOOLEAN]: z.boolean(baseZod),
+    [FIELD_KIND.ID]: z
       .any()
       .transform(it => (typeof it === 'string' ? it : it?.id ?? null))
       .refine((it: unknown) => it != null, options?.localization?.invalidType),
-    [FIELD_KIND.Image]: z
+    [FIELD_KIND.IMAGE]: z
       .any()
       .refine(isRequired(validation))
       .refine(input => input == null || isBrowserFile(input), options?.localization?.invalidType)
@@ -226,7 +226,7 @@ const getFieldKindRules = <
         isSupportedImage(options?.acceptedImageMimeType ?? DEFAULT_ACCEPTED_IMAGE_MIME_TYPES),
         options?.localization?.allowedImageFormat,
       ),
-    [FIELD_KIND.File]: z
+    [FIELD_KIND.FILE]: z
       .any()
       .refine(isRequired(validation))
       .refine(file => isBrowserFile(file), options?.localization?.invalidType),
