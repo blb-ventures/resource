@@ -231,7 +231,7 @@ export class ResourcesManager<
 
   getKindDisplay(kind: FieldKinds, label?: string) {
     const fieldInstance = this.getFieldInstance({ kind, label: label ?? '', name: '' });
-    return fieldInstance.display.bind(this);
+    return fieldInstance.display.bind(fieldInstance);
   }
 
   fieldDisplay(
@@ -245,7 +245,7 @@ export class ResourcesManager<
     field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>,
   ) {
     const fieldInstance = this.getFieldInstance(field);
-    return fieldInstance.display.bind(this);
+    return fieldInstance.display.bind(fieldInstance);
   }
 
   getFieldFormField<

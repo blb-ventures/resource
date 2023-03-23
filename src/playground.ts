@@ -152,6 +152,7 @@ console.log(resourceManager.getFieldInstance(firstName));
 console.log(resourceManager.getFieldValidation(firstName));
 console.log(resourceManager.getFormField({}, 'User.phone'));
 console.log(resourceManager.getKindDisplay('ID', 'User ID'));
-console.log(resourceManager.getResourceFields('Session'));
+const sessionFields = resourceManager.getResourceFields('Session');
+console.log(sessionFields);
 console.log(resourceManager.getValidation('User.status'));
 console.log(resourceManager.kindDisplay(true, 'BOOLEAN'));
