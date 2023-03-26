@@ -186,9 +186,9 @@ export class ResourcesManager<
     return resources;
   }
 
-  getFieldInstance<
-    Props extends Record<string, unknown> = Record<string, unknown>
-  >(field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>) {
+  getFieldInstance<Props extends Record<string, unknown> = Record<string, unknown>>(
+    field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>,
+  ) {
     if (isAPIField(field)) {
       const FieldClass =
         field.kind in this.fieldByKind && this.fieldByKind[field.kind as FieldKinds] != null
@@ -201,9 +201,13 @@ export class ResourcesManager<
       this.fieldObjectByKind[field.objKind as FieldObjectKinds] != null
         ? this.fieldObjectByKind[field.objKind as FieldObjectKinds] ?? this.DefaultFieldObject
         : this.DefaultFieldObject;
-    return new FieldObjectClass<FieldObjectKinds, keyof APIResources & string, RenderResult, ValidationResult, Props>(
-      field,
-    );
+    return new FieldObjectClass<
+      FieldObjectKinds,
+      keyof APIResources & string,
+      RenderResult,
+      ValidationResult,
+      Props
+    >(field);
   }
 
   getField(path: ResourceFieldPath<APIResources>) {
@@ -265,9 +269,7 @@ export class ResourcesManager<
     return fieldInstance.display.bind(fieldInstance);
   }
 
-  getFieldFormField<
-    Props extends Record<string, unknown> = Record<string, unknown>,
-  >(
+  getFieldFormField<Props extends Record<string, unknown> = Record<string, unknown>>(
     props: Props,
     field: APIResourceField<FieldKinds, FieldObjectKinds, keyof APIResources & string>,
   ): RenderResult | null {
@@ -283,7 +285,8 @@ export class ResourcesManager<
       fieldInstance.getValidation?.() ??
       this.validationAdapter?.(fieldInstance, {
         getResourceFields: this.getResourceFields.bind(this),
-      }) ?? null
+      }) ??
+      null
     );
   }
 

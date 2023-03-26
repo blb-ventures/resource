@@ -201,7 +201,7 @@ export const getFieldsRules = <
     RenderResult,
     ValidationResult
   >[],
-) => fields.reduce((acc, it) => ({ ...acc, [it.name]: getFieldRules(it) }), {} as ZodRawShape);
+) => fields.reduce<ZodRawShape>((acc, it) => ({ ...acc, [it.name]: getFieldRules(it) }), {});
 
 export const isSupportedImage = (allowedImageFormat: string[]) => (input: unknown) =>
   input == null || (isBrowserFile(input) && allowedImageFormat.includes(input.type));

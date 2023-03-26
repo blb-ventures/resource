@@ -1,6 +1,6 @@
 {
   "name": "@blb-ventures/resource",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
@@ -39,6 +39,7 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
+    "@blb-ventures/eslint-config": "^0.1.6",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/eslint": "^8.21.3",
     "@types/react": "^18.0.28",
