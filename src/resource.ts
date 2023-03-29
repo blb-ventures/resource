@@ -223,6 +223,10 @@ export class ResourcesManager<
     return refType[subFieldName];
   }
 
+  getFieldList(path: ResourceFieldPath<APIResources>[]) {
+    return path.map((p) => this.getField(p));
+  }
+
   display(value: unknown, path: ResourceFieldPath<APIResources>): string | null {
     const field = this.getField(path);
     return this.fieldDisplay(value, field);
