@@ -250,6 +250,10 @@ export class ResourcesManager<
     return this.getFieldValidation(field);
   }
 
+  getValidationList(path: ResourceFieldPath<APIResources>[]): ValidationResult[] {
+    return path.flatMap(p => this.getValidation(p) ?? []);
+  }
+
   kindDisplay(value: unknown, kind: FieldKinds): string | null {
     return this.getKindDisplay(kind)(value);
   }
