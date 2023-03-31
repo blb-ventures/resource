@@ -25,7 +25,7 @@ export class FieldImpl<
   Props = any,
   RenderResult = any,
   ValidationResult = any,
-> implements Field<FieldKinds, Props, RenderResult, ValidationResult>
+> implements Field<FieldKinds, RenderResult, ValidationResult, Props>
 {
   choices?: FieldChoice[] | null;
   defaultValue?: any;
@@ -74,7 +74,7 @@ export class FieldObjectImpl<
   Props = any,
   RenderResult = any,
   ValidationResult = any,
-> implements FieldObject<FieldObjectKinds, ResourcesKeys, Props, RenderResult, ValidationResult>
+> implements FieldObject<FieldObjectKinds, ResourcesKeys, RenderResult, ValidationResult, Props>
 {
   label: string;
   name: string;
@@ -224,7 +224,7 @@ export class ResourcesManager<
   }
 
   getFieldList(path: ResourceFieldPath<APIResources>[]) {
-    return path.map((p) => this.getField(p));
+    return path.map(p => this.getField(p));
   }
 
   display(value: unknown, path: ResourceFieldPath<APIResources>): string | null {
