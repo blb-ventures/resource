@@ -10,6 +10,7 @@ import {
   ZodOptional,
   ZodRawShape,
   ZodString,
+  ZodType,
   ZodTypeAny,
 } from 'zod';
 import {
@@ -87,7 +88,10 @@ export type ValidationZodKinds =
 export interface ZodAdapterOptions<FieldKinds extends string, FieldObjectKinds extends string> {
   // Defines base validation for the kinds. Other validations will be added on top of it to handle
   // multiple (array) and type validation requirements
-  rulesByKind?: Record<string, (field: Field<FieldKinds, FieldObjectKinds>) => ZodTypeAny>;
+  rulesByKind?: Record<
+    string,
+    (field: Field<FieldKinds, FieldObjectKinds>, schema: ZodType) => ZodTypeAny
+  >;
   // Defines final validation for the kinds. Needs to handle multiple (array) and type validation.
   rulesByKindRaw?: Record<string, (field: Field<FieldKinds, FieldObjectKinds>) => ZodTypeAny>;
   acceptedImageMimeType?: string[];
@@ -141,14 +145,15 @@ export const getFieldRules = <
     return z.any();
   }
 
+  if (options?.rulesByKindRaw != null && field.kind in options.rulesByKindRaw) {
+    return options.rulesByKindRaw[field.kind](field);
+  }
+
   const fieldValidation = validation ?? field.validation;
   if (fieldValidation == null) return z.any();
 
   if (isNumberValidation(fieldValidation)) {
     return utils.addMultipleValidation(utils.getNumberValidation(fieldValidation), field.multiple);
-  }
-  if (options?.rulesByKindRaw != null && field.kind in options.rulesByKindRaw) {
-    return options.rulesByKindRaw[field.kind](field);
   }
 
   const baseZod =
@@ -164,7 +169,7 @@ export const getFieldRules = <
     schema = fieldKindValidator;
   }
   if (options?.rulesByKind != null && field.kind in options.rulesByKind) {
-    schema = options.rulesByKind[field.kind](field);
+    schema = options.rulesByKind[field.kind](field, schema);
   }
   schema = utils.addRequired(fieldValidation.required, schema);
   if (schema instanceof ZodString && isStringValidation(fieldValidation)) {
