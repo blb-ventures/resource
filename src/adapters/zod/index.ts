@@ -117,7 +117,7 @@ export const zodAdapter =
     FieldObjectKinds extends string = string,
   >(
     options?: ZodAdapterOptions<FieldKinds, FieldObjectKinds>,
-  ): ValidationAdapter<FieldKinds, FieldObjectKinds, ResourcesKeys, any, any, ZodTypeAny> =>
+  ): ValidationAdapter<FieldKinds, FieldObjectKinds, ResourcesKeys, never, ZodTypeAny> =>
   (field, context) => {
     if (isField(field)) return getFieldRules(field, options);
     if (isFieldObject(field)) {
@@ -196,7 +196,7 @@ export const getFieldsRules = <
   FieldKinds extends string = FieldKind,
   FieldObjectKinds extends string = string,
   ResourceKeys extends string = string,
-  RenderResult = any,
+  RenderResult = never,
   ValidationResult = ZodTypeAny,
 >(
   fields: ResourceField<

@@ -14,6 +14,7 @@ import {
   FieldObjectConstructor,
   FieldValidation,
   FormAdapter,
+  PathToNestedRecord,
   ResourceField,
   ResourceFieldPath,
   ValidationAdapter,
@@ -253,6 +254,28 @@ export class ResourcesManager<
   getValidationList(path: ResourceFieldPath<APIResources>[]): ValidationResult[] {
     return path.flatMap(p => this.getValidation(p) ?? []);
   }
+
+  getValidationByName = (<T extends ResourceFieldPath<APIResources>[]>(path: T): PathToNestedRecord<ValidationResult, T> => {
+    return path.reduce<PathToNestedRecord<ValidationResult, T>>((acc, p) => {
+      const [_, key, subKey] = p.split('.');
+      const validation = this.getValidation(p);
+      if (validation == null) return acc;
+      if ((subKey as string | null) != null) {
+        return {
+          // NOTE: By converting our Intersection of Records (inferred from the path) to a Union
+          // of those records typescript cannot infer the type of the accumulator, so we need to
+          // explicitly tell it that it is a Record.
+          ...acc as Record<string, any>,
+          [key]: {
+            ...(acc as Record<string, any>)[key],
+            [subKey]: validation,
+          },
+        };
+      }
+      return { ...acc as any, [key]: validation };
+    // eslint-disable-next-line @typescript-eslint/prefer-reduce-type-parameter
+    }, {} as PathToNestedRecord<ValidationResult, T>);
+  });
 
   kindDisplay(value: unknown, kind: FieldKinds): string | null {
     return this.getKindDisplay(kind)(value);

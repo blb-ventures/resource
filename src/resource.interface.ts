@@ -257,3 +257,28 @@ export type ResourceFieldPath<
     ? `${Key}.${keyof T[Key]}` | ResourceFieldObjectPath<T, Key, keyof T[Key]>
     : never
   : never;
+
+export type PathToFlatRecord<
+  Path extends string,
+  Data,
+> = Path extends `${string}.${infer Key}.${infer SubKey}`
+  ? Record<Key, Record<SubKey, Data>>
+  : Path extends `${string}.${infer Key}`
+  ? Record<Key, Data>
+  : Record<string, unknown>;
+
+export type PathToNestedRecord<Data, Path extends string[]> = IntersectionToUnion<
+  Path[number] extends `${string}.${infer Key}`
+    ? Key extends `${infer MainKey}.${infer SubKey}`
+      ? { [k in MainKey]: { [j in SubKey]: Data } }
+      : {
+          [k in Key]: Data;
+        }
+    : Record<string, any>
+>;
+
+export type IntersectionToUnion<T> = (T extends any ? (x: T) => any : never) extends (
+  x: infer R,
+) => any
+  ? R
+  : never;

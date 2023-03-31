@@ -156,3 +156,11 @@ const sessionFields = resourceManager.getResourceFields('Session');
 console.log('getResourceFields', sessionFields);
 console.log('getValidation', resourceManager.getValidation('User.status'));
 console.log('kindDisplay', resourceManager.kindDisplay(true, 'BOOLEAN'));
+
+const validationByName = resourceManager.getValidationByName([
+  'User.id',
+  'Session.user.name',
+  'User.status',
+]);
+console.log('getValidationByName', validationByName);
+console.log('user.name validation from Session', validationByName.user.name);
