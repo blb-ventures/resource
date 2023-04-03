@@ -135,32 +135,33 @@ const resourceManager = new ResourcesManager(filteredObject, {
   }),
 });
 
-console.log('display', resourceManager.display(true, 'User.isAdmin'));
-const firstName = resourceManager.getField('Session.user.name');
-if (firstName != null) {
-  console.log('fieldDisplay', resourceManager.fieldDisplay('John Doe', firstName));
-}
+// console.log('display', resourceManager.display(true, 'User.isAdmin'));
+// const firstName = resourceManager.getField('Session.user.name');
+// if (firstName != null) {
+//   console.log('fieldDisplay', resourceManager.fieldDisplay('John Doe', firstName));
+// }
 
-const sessionUser = resourceManager.getField('Session.user');
-const sessionUserField = resourceManager.getFieldInstance(sessionUser);
-console.log('getField -> getFieldInstance -> name', sessionUserField.name);
+// const sessionUser = resourceManager.getField('Session.user');
+// const sessionUserField = resourceManager.getFieldInstance(sessionUser);
+// console.log('getField -> getFieldInstance -> name', sessionUserField.name);
 
-console.log('getDisplayFn', resourceManager.getDisplayFn('User.birthday'));
-console.log('getFieldDisplayFn', resourceManager.getFieldDisplayFn(firstName));
-console.log('getFieldFormField', resourceManager.getFieldFormField({}, firstName));
-console.log('getFieldInstance', resourceManager.getFieldInstance(firstName));
-console.log('getFieldValidation', resourceManager.getFieldValidation(firstName));
-console.log('getFormField', resourceManager.getFormField({}, 'User.phone'));
-console.log('getKindDisplay', resourceManager.getKindDisplay('ID', 'User ID'));
-const sessionFields = resourceManager.getResourceFields('Session');
-console.log('getResourceFields', sessionFields);
-console.log('getValidation', resourceManager.getValidation('User.status'));
-console.log('kindDisplay', resourceManager.kindDisplay(true, 'BOOLEAN'));
+// console.log('getDisplayFn', resourceManager.getDisplayFn('User.birthday'));
+// console.log('getFieldDisplayFn', resourceManager.getFieldDisplayFn(firstName));
+// console.log('getFieldFormField', resourceManager.getFieldFormField({}, firstName));
+// console.log('getFieldInstance', resourceManager.getFieldInstance(firstName));
+// console.log('getFieldValidation', resourceManager.getFieldValidation(firstName));
+// console.log('getFormField', resourceManager.getFormField({}, 'User.phone'));
+// console.log('getKindDisplay', resourceManager.getKindDisplay('ID', 'User ID'));
+// const sessionFields = resourceManager.getResourceFields('Session');
+// console.log('getResourceFields', sessionFields);
+// console.log('getValidation', resourceManager.getValidation('User.status'));
+// console.log('kindDisplay', resourceManager.kindDisplay(true, 'BOOLEAN'));
 
 const validationByName = resourceManager.getValidationByName([
   'User.id',
   'Session.user.name',
-  'User.status',
+  'User.isAdmin',
 ]);
-console.log('getValidationByName', validationByName);
-console.log('user.name validation from Session', validationByName.user.name);
+// console.log('getValidationByName', validationByName);
+// console.log('user.name validation from Session', validationByName.user.name);
+console.log('user.isAdmin validation', validationByName.isAdmin);

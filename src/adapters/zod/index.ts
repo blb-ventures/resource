@@ -126,7 +126,7 @@ export const zodAdapter =
         options,
       );
     }
-    return null;
+    return z.any();
   };
 
 export const getFieldRules = <
@@ -164,8 +164,9 @@ export const getFieldRules = <
         }
       : undefined;
   let schema: ValidationZodKinds = z.string(baseZod);
-  if (field.kind in getFieldKindRules) {
-    const fieldKindValidator = getFieldKindRules(fieldValidation, options)[field.kind];
+  const fieldKindRules = getFieldKindRules(fieldValidation, options);
+  if (field.kind in fieldKindRules) {
+    const fieldKindValidator = fieldKindRules[field.kind];
     schema = fieldKindValidator;
   }
   if (options?.rulesByKind != null && field.kind in options.rulesByKind) {
