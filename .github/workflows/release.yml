@@ -1,28 +1,45 @@
-name: Release
 on:
-  workflow_run:
-    workflows: ['Tests']
-    branches: [main]
-    types:
-      - completed
-
+   push:
+     branches:
+       - main
+name: 🆕 Release
+permissions: {}
 jobs:
   release:
-    name: Release
+    permissions:
+      contents: write # to create release commit (google-github-actions/release-please-action)
+      pull-requests: write # to create release PR (google-github-actions/release-please-action)
+
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: google-github-actions/release-please-action@v3
+        id: release
         with:
-          fetch-depth: 0
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+          package-name: "@blb-ventures/resource"
+          bump-minor-pre-major: true
+          changelog-types: "\
+            [{\"type\":\"feat\",\"section\":\"Features\",\"hidden\":false},
+            {\"type\":\"fix\",\"section\":\"Bug Fixes\",\"hidden\":false},
+            {\"type\":\"perf\",\"section\":\"Performance\",\"hidden\":false},
+            {\"type\":\"deps\",\"section\":\"Dependencies\",\"hidden\":false},
+            {\"type\":\"revert\",\"section\":\"Reverts\",\"hidden\":false},
+            {\"type\":\"docs\",\"section\":\"Documentation\",\"hidden\":false},
+            {\"type\":\"style\",\"section\":\"Styles\",\"hidden\":false},
+            {\"type\":\"refactor\",\"section\":\"Code Refactoring\",\"hidden\":false},
+            {\"type\":\"test\",\"section\":\"Tests\",\"hidden\":false},
+            {\"type\":\"build\",\"section\":\"Build System\",\"hidden\":false},
+            {\"type\":\"ci\",\"section\":\"Continuous Integration\",\"hidden\":false},
+            {\"type\":\"chore\",\"section\":\"Miscellaneous\",\"hidden\":false}]"
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: 'lts/*'
-      - name: Install dependencies
-        run: npm ci
-      - name: Release
+          node-version: 18
+          cache: 'npm'
+      - run: npm install
+        if: ${{ steps.release.outputs.release_created }}``
+      - run: npm publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+        if: ${{ steps.release.outputs.release_created }}
