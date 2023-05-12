@@ -6,8 +6,13 @@ import {
   FieldValidation,
 } from './resource.interface';
 
-export interface KindManager<Kind extends APIFieldUnion, FormResult, ValidationResult> {
-  display(field: Kind, value: any): string;
+export interface KindManager<
+  Kind extends APIFieldUnion,
+  FormResult,
+  ValidationResult,
+  DisplayResult = string | null,
+> {
+  display(field: Kind, value: any): DisplayResult;
   validation(field: Kind, validation?: FieldValidation): ValidationResult;
   formField(field: Kind, props?: any): FormResult;
 }
@@ -18,14 +23,23 @@ export interface ManagerOptions<
   FormResult,
   ValidationResult,
   ValidationSchema,
+  DisplayResult = string | null,
 > {
-  fieldManagerByKind: Record<FieldKinds, KindManager<APIField, FormResult, ValidationResult>>;
+  fieldManagerByKind: Record<
+    FieldKinds,
+    KindManager<APIField, FormResult, ValidationResult, DisplayResult>
+  >;
   fieldObjectManagerByKind: Record<
     FieldObjectKinds,
-    KindManager<APIFieldObject, FormResult, ValidationResult>
+    KindManager<APIFieldObject, FormResult, ValidationResult, DisplayResult>
   >;
-  defaultFieldManager: KindManager<APIField, FormResult, ValidationResult>;
-  defaultFieldObjectManager: KindManager<APIFieldObject, FormResult, ValidationResult>;
+  defaultFieldManager: KindManager<APIField, FormResult, ValidationResult, DisplayResult>;
+  defaultFieldObjectManager: KindManager<
+    APIFieldObject,
+    FormResult,
+    ValidationResult,
+    DisplayResult
+  >;
   validationSchemaBuilder: (
     fieldValidationTuple: [APIField, ValidationResult][],
   ) => ValidationSchema;
@@ -38,15 +52,24 @@ export class ResourceManager<
   FormResult,
   ValidationResult,
   ValidationSchema,
+  DisplayResult = string | null,
 > {
   resources: Resources;
-  fieldManagerByKind: Record<FieldKinds, KindManager<APIField, FormResult, ValidationResult>>;
+  fieldManagerByKind: Record<
+    FieldKinds,
+    KindManager<APIField, FormResult, ValidationResult, DisplayResult>
+  >;
   fieldObjectManagerByKind: Record<
     FieldObjectKinds,
-    KindManager<APIFieldObject, FormResult, ValidationResult>
+    KindManager<APIFieldObject, FormResult, ValidationResult, DisplayResult>
   >;
-  defaultFieldManager: KindManager<APIField, FormResult, ValidationResult>;
-  defaultFieldObjectManager: KindManager<APIFieldObject, FormResult, ValidationResult>;
+  defaultFieldManager: KindManager<APIField, FormResult, ValidationResult, DisplayResult>;
+  defaultFieldObjectManager: KindManager<
+    APIFieldObject,
+    FormResult,
+    ValidationResult,
+    DisplayResult
+  >;
   validationSchemaBuilder: (
     fieldValidationTuple: [APIField, ValidationResult][],
   ) => ValidationSchema;
@@ -58,7 +81,8 @@ export class ResourceManager<
       FieldObjectKinds,
       FormResult,
       ValidationResult,
-      ValidationSchema
+      ValidationSchema,
+      DisplayResult
     >,
   ) {
     this.resources = resources;
@@ -68,7 +92,9 @@ export class ResourceManager<
     this.fieldObjectManagerByKind = options.fieldObjectManagerByKind;
   }
 
-  getManager(field: APIFieldUnion): KindManager<APIFieldUnion, FormResult, ValidationResult> {
+  getManager(
+    field: APIFieldUnion,
+  ): KindManager<APIFieldUnion, FormResult, ValidationResult, DisplayResult> {
     if ('kind' in field) {
       if (field.kind in this.fieldManagerByKind) {
         return this.fieldManagerByKind[field.kind as FieldKinds];
@@ -81,7 +107,7 @@ export class ResourceManager<
     return this.defaultFieldObjectManager;
   }
 
-  getFieldDisplay(field: APIFieldUnion, value?: FieldValidation): string {
+  getFieldDisplay(field: APIFieldUnion, value?: FieldValidation): DisplayResult {
     return this.getManager(field).display(field, value);
   }
 

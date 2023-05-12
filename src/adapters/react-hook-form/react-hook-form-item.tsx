@@ -10,6 +10,7 @@ export interface ReactHookFormItemProps<
   Resources extends APIResources,
   FieldKinds extends PropertyKey,
   FieldObjectKinds extends PropertyKey,
+  FormResult extends JSX.Element | null = JSX.Element | null,
   FormType extends FieldValues = FieldValues,
 > {
   name?: string;
@@ -18,13 +19,14 @@ export interface ReactHookFormItemProps<
   componentProps?: Record<string, unknown>;
   formItemProps?: Partial<ControllerProps>;
   FormControlWrapper?: FC<FormControlWrapperProps>;
-  manager: ResourceManager<Resources, FieldKinds, FieldObjectKinds, JSX.Element, any, any>;
+  manager: ResourceManager<Resources, FieldKinds, FieldObjectKinds, FormResult, any, any>;
 }
 
 export const ReactHookFormItem = <
   Resources extends APIResources,
   FieldKinds extends PropertyKey,
   FieldObjectKinds extends PropertyKey,
+  FormResult extends JSX.Element | null = JSX.Element | null,
   FormType extends FieldValues = FieldValues,
 >({
   control,
@@ -34,7 +36,7 @@ export const ReactHookFormItem = <
   FormControlWrapper,
   name,
   manager,
-}: ReactHookFormItemProps<Resources, FieldKinds, FieldObjectKinds, FormType>) => {
+}: ReactHookFormItemProps<Resources, FieldKinds, FieldObjectKinds, FormResult, FormType>) => {
   const defaultValue = useMemo(() => (isAPIField(field) ? field.defaultValue : undefined), [field]);
   return (
     <Controller
