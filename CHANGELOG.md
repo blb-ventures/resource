@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/blb-ventures/resource/compare/v0.8.0...v0.8.1) (2023-05-12)
+
+
+### Bug Fixes
+
+* removes export of a removed file ([36d41e1](https://github.com/blb-ventures/resource/commit/36d41e14ade4e290a50dc9051213d63adcc2792f))
+
 ## [0.8.0](https://github.com/blb-ventures/resource/compare/v0.7.1...v0.8.0) (2023-05-12)
 
 
