@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.0](https://github.com/blb-ventures/resource/compare/v0.8.1...v0.9.0) (2023-05-12)
+
+
+### Features
+
+* makes display function returns a generic and makes it more lax by defaulting it to string|null ([31280b3](https://github.com/blb-ventures/resource/commit/31280b3fa845cf0ae7ff251c18819fca8edf0ab0))
+* makes react-hook-form adapter return more lax by allowing it to return JSX.Element | null ([31280b3](https://github.com/blb-ventures/resource/commit/31280b3fa845cf0ae7ff251c18819fca8edf0ab0))
+
 ## [0.8.1](https://github.com/blb-ventures/resource/compare/v0.8.0...v0.8.1) (2023-05-12)
 
 
