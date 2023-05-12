@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/blb-ventures/resource/compare/v0.9.0...v0.9.1) (2023-05-12)
+
+
+### Bug Fixes
+
+* fixes getFieldDisplay value type ([bc6066e](https://github.com/blb-ventures/resource/commit/bc6066e988373e45a70411ee942cc789843e3eaa))
+
 ## [0.9.0](https://github.com/blb-ventures/resource/compare/v0.8.1...v0.9.0) (2023-05-12)
 
 
