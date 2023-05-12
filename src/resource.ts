@@ -119,18 +119,21 @@ export class ResourceManager<
     return this.getManager(field).validation(field, validation);
   }
 
-  getFieldListFormField = <T extends APIFieldUnion>(fields: T[], props: Record<T['name'], any>) => {
+  getFieldListFormField = <T extends APIFieldUnion>(
+    fields: T[],
+    props?: Partial<Record<T['name'], any>>,
+  ) => {
     return fields.map(field =>
       this.getFieldFormField(
         field,
-        field.name in props ? props[field.name as keyof typeof props] : undefined,
+        props != null && field.name in props ? props[field.name as keyof typeof props] : undefined,
       ),
     );
   };
 
   getValidationSchema = <T extends APIFieldUnion>(
     fields: T[],
-    validation: Record<T['name'], any>,
+    validation?: Partial<Record<T['name'], any>>,
   ) => {
     return this.validationSchemaBuilder(
       fields.map(
@@ -139,7 +142,7 @@ export class ResourceManager<
             field,
             this.getFieldValidation(
               field,
-              field.name in validation
+              validation != null && field.name in validation
                 ? validation[field.name as keyof typeof validation]
                 : undefined,
             ),
