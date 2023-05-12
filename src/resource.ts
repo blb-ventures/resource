@@ -133,7 +133,7 @@ export class ResourceManager<
 
   getValidationSchema = <T extends APIFieldUnion>(
     fields: T[],
-    validation?: Partial<Record<T['name'], any>>,
+    validation?: Partial<Record<T['name'], FieldValidation>>,
   ) => {
     return this.validationSchemaBuilder(
       fields.map(
