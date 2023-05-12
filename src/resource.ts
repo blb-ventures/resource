@@ -107,7 +107,7 @@ export class ResourceManager<
     return this.defaultFieldObjectManager;
   }
 
-  getFieldDisplay(field: APIFieldUnion, value?: FieldValidation): DisplayResult {
+  getFieldDisplay(field: APIFieldUnion, value?: any): DisplayResult {
     return this.getManager(field).display(field, value);
   }
 
