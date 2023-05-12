@@ -14,18 +14,15 @@ import {
   ZodTypeAny,
 } from 'zod';
 import {
+  APIFieldUnion,
   DecimalFieldValidation,
-  Field,
   FieldValidation,
   IntFieldValidation,
-  ResourceField,
   StringFieldValidation,
-  ValidationAdapter,
 } from '../../resource.interface';
 import {
+  isAPIFieldObject,
   isBrowserFile,
-  isField,
-  isFieldObject,
   isNumberValidation,
   isStringValidation,
 } from '../../resource.typeguards';
@@ -85,15 +82,12 @@ export type ValidationZodKinds =
   | ZodOptional<any>
   | ZodArray<ValidationZodKinds>;
 
-export interface ZodAdapterOptions<FieldKinds extends string, FieldObjectKinds extends string> {
+export interface ZodAdapterOptions {
   // Defines base validation for the kinds. Other validations will be added on top of it to handle
   // multiple (array) and type validation requirements
-  rulesByKind?: Record<
-    string,
-    (field: Field<FieldKinds, FieldObjectKinds>, schema: ZodType) => ZodTypeAny
-  >;
+  rulesByKind?: Record<string, (field: APIFieldUnion, schema: ZodType) => ZodTypeAny>;
   // Defines final validation for the kinds. Needs to handle multiple (array) and type validation.
-  rulesByKindRaw?: Record<string, (field: Field<FieldKinds, FieldObjectKinds>) => ZodTypeAny>;
+  rulesByKindRaw?: Record<string, (field: APIFieldUnion) => ZodTypeAny>;
   acceptedImageMimeType?: string[];
   localization?: {
     required: string;
@@ -110,37 +104,15 @@ export interface ZodAdapterOptions<FieldKinds extends string, FieldObjectKinds e
   };
 }
 
-export const zodAdapter =
-  <
-    ResourcesKeys extends string,
-    FieldKinds extends string = string,
-    FieldObjectKinds extends string = string,
-  >(
-    options?: ZodAdapterOptions<FieldKinds, FieldObjectKinds>,
-  ): ValidationAdapter<FieldKinds, FieldObjectKinds, ResourcesKeys, never, ZodTypeAny> =>
-  (field, context) => {
-    if (isField(field)) return getFieldRules(field, options);
-    if (isFieldObject(field)) {
-      return getFieldRecordRules(
-        context.getResourceFields(field.objType as ResourcesKeys),
-        options,
-      );
-    }
-    return z.any();
-  };
-
-export const getFieldRules = <
-  FieldKinds extends string = FieldKind,
-  FieldObjectKinds extends string = string,
->(
-  field: ResourceField<FieldKinds, FieldObjectKinds>,
-  options?: ZodAdapterOptions<FieldKinds, FieldObjectKinds>,
+export const getFieldRules = (
+  field: APIFieldUnion,
+  options?: ZodAdapterOptions,
   validation?: FieldValidation,
 ) => {
   const utils = getValidationUtils(options);
 
   // Handle other levels of field objects
-  if (isFieldObject(field)) {
+  if (isAPIFieldObject(field)) {
     // NOTE: should we handle every level?
     return z.any();
   }
@@ -179,35 +151,20 @@ export const getFieldRules = <
   return utils.addMultipleValidation(schema, field.multiple);
 };
 
-export const getFieldRecordRules = <
-  FieldKinds extends string = FieldKind,
-  FieldObjectKinds extends string = string,
->(
-  fields: ResourceField<FieldKinds, FieldObjectKinds>[],
-  options?: ZodAdapterOptions<FieldKinds, FieldObjectKinds>,
+export const getValidationSchema = (
+  fields: APIFieldUnion[],
+  options?: ZodAdapterOptions,
+  validation?: FieldValidation,
 ): ZodObject<ZodRawShape> =>
   z.object(
     fields.reduce<ZodRawShape>(
-      (acc, it) => ({ ...acc, [it.name]: getFieldRules(it, options) }),
+      (acc, it) => ({ ...acc, [it.name]: getFieldRules(it, options, validation) }),
       {},
     ),
   );
 
-export const getFieldsRules = <
-  FieldKinds extends string = FieldKind,
-  FieldObjectKinds extends string = string,
-  ResourceKeys extends string = string,
-  RenderResult = never,
-  ValidationResult = ZodTypeAny,
->(
-  fields: ResourceField<
-    FieldKinds,
-    FieldObjectKinds,
-    ResourceKeys,
-    RenderResult,
-    ValidationResult
-  >[],
-) => fields.reduce<ZodRawShape>((acc, it) => ({ ...acc, [it.name]: getFieldRules(it) }), {});
+export const getRulesByName = (fields: APIFieldUnion[]) =>
+  fields.reduce<ZodRawShape>((acc, it) => ({ ...acc, [it.name]: getFieldRules(it) }), {});
 
 export const isSupportedImage = (allowedImageFormat: string[]) => (input: unknown) =>
   input == null || (isBrowserFile(input) && allowedImageFormat.includes(input.type));
@@ -215,13 +172,7 @@ export const isSupportedImage = (allowedImageFormat: string[]) => (input: unknow
 export const isRequired = (validation: FieldValidation) => (input: unknown) =>
   validation.required && input != null;
 
-const getFieldKindRules = <
-  FieldKey extends string = FieldKind,
-  FieldObjectKey extends string = string,
->(
-  validation: FieldValidation,
-  options?: ZodAdapterOptions<FieldKey, FieldObjectKey>,
-) => {
+const getFieldKindRules = (validation: FieldValidation, options?: ZodAdapterOptions) => {
   const baseZod =
     options?.localization?.invalidType != null || options?.localization?.required != null
       ? {
@@ -255,12 +206,7 @@ const getFieldKindRules = <
   };
 };
 
-export const getValidationUtils = <
-  FieldKey extends string = FieldKind,
-  FieldObjectKey extends string = string,
->(
-  options?: ZodAdapterOptions<FieldKey, FieldObjectKey>,
-) => {
+export const getValidationUtils = (options?: ZodAdapterOptions) => {
   const addMinLength = (schema: ZodString, min: number, message?: string) =>
     schema.min(min, message ?? options?.localization?.minLength?.(min));
   const addMaxLength = (schema: ZodString, max: number, message?: string) =>

@@ -1,40 +1,16 @@
 import {
   APIField,
   APIFieldObject,
-  APIResourceField,
+  APIFieldUnion,
   DecimalFieldValidation,
-  Field,
-  FieldObject,
   FieldValidation,
   IntFieldValidation,
-  ResourceField,
   StringFieldValidation,
 } from './resource.interface';
 
-export const isField = <FieldKey extends string = string, FieldObjectKey extends string = string>(
-  field: ResourceField<FieldKey, FieldObjectKey>,
-): field is Field<FieldKey> => 'kind' in field;
-
-export const isFieldObject = <
-  FieldKey extends string = string,
-  FieldObjectKey extends string = string,
->(
-  field: ResourceField<FieldKey, FieldObjectKey>,
-): field is FieldObject<FieldObjectKey> => 'fields' in field;
-
-export const isAPIField = <
-  FieldKey extends string = string,
-  FieldObjectKey extends string = string,
-  ResourcesKeys extends string = string,
->(
-  field: APIResourceField<FieldKey, FieldObjectKey, ResourcesKeys>,
-): field is APIField<FieldKey> => 'kind' in field;
-export const isAPIFieldObject = <
-  FieldKey extends string = string,
-  FieldObjectKey extends string = string,
->(
-  field: APIResourceField<FieldKey, FieldObjectKey>,
-): field is APIFieldObject<FieldObjectKey> => 'fields' in field;
+export const isAPIField = (field: APIFieldUnion): field is APIField => 'kind' in field;
+export const isAPIFieldObject = (field: APIFieldUnion): field is APIFieldObject =>
+  'fields' in field;
 
 export const isNumberValidation = (
   validation: FieldValidation,

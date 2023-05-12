@@ -1,23 +1,30 @@
-import { FC, ReactElement, useMemo } from 'react';
+import { FC, useMemo } from 'react';
 import { Control, Controller, ControllerProps, FieldValues } from 'react-hook-form';
-import { ResourceField } from '../../resource.interface';
+import { ResourceManager } from '../../resource';
+import { APIFieldUnion, APIResources } from '../../resource.interface';
 import { isAPIField } from '../../resource.typeguards';
+import { ReactField } from '../react/react-field';
 import { FormControlWrapperProps } from './interfaces';
 
 export interface ReactHookFormItemProps<
-  FieldKey extends string = string,
+  Resources extends APIResources,
+  FieldKinds extends PropertyKey,
+  FieldObjectKinds extends PropertyKey,
   FormType extends FieldValues = FieldValues,
 > {
   name?: string;
   control?: Control<FormType>;
-  field: ResourceField<FieldKey, string, string, any, ReactElement>;
+  field: APIFieldUnion;
   componentProps?: Record<string, unknown>;
   formItemProps?: Partial<ControllerProps>;
   FormControlWrapper?: FC<FormControlWrapperProps>;
+  manager: ResourceManager<Resources, FieldKinds, FieldObjectKinds, JSX.Element, any, any>;
 }
 
 export const ReactHookFormItem = <
-  FieldKey extends string = string,
+  Resources extends APIResources,
+  FieldKinds extends PropertyKey,
+  FieldObjectKinds extends PropertyKey,
   FormType extends FieldValues = FieldValues,
 >({
   control,
@@ -26,25 +33,31 @@ export const ReactHookFormItem = <
   componentProps,
   FormControlWrapper,
   name,
-}: ReactHookFormItemProps<FieldKey, FormType>) => {
+  manager,
+}: ReactHookFormItemProps<Resources, FieldKinds, FieldObjectKinds, FormType>) => {
   const defaultValue = useMemo(() => (isAPIField(field) ? field.defaultValue : undefined), [field]);
-  return field.getFormField == null ? null : (
+  return (
     <Controller
       control={control as any}
       defaultValue={defaultValue}
       name={name ?? field.name}
       render={renderProps => {
-        if (field.getFormField == null) return <div />;
-        const autoField = field.getFormField({
-          onBlur: renderProps.field.onBlur,
-          onChange: renderProps.field.onChange,
-          value: renderProps.field.value,
-          ...componentProps,
-          id: `form-item-${renderProps.field.name}`,
-          label: field.label,
-          name: renderProps.field.name,
-          renderProps,
-        });
+        const formField = (
+          <ReactField
+            field={field}
+            manager={manager}
+            componentProps={{
+              onBlur: renderProps.field.onBlur,
+              onChange: renderProps.field.onChange,
+              value: renderProps.field.value,
+              ...componentProps,
+              id: `form-item-${renderProps.field.name}`,
+              label: field.label,
+              name: renderProps.field.name,
+              renderProps,
+            }}
+          />
+        );
         return FormControlWrapper != null ? (
           <FormControlWrapper
             helperText={componentProps?.helperText as string}
@@ -52,10 +65,10 @@ export const ReactHookFormItem = <
             name={renderProps.field.name}
             renderProps={renderProps}
           >
-            {autoField}
+            {formField}
           </FormControlWrapper>
         ) : (
-          autoField ?? <div />
+          formField
         );
       }}
       {...formItemProps}
