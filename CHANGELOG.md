@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/blb-ventures/resource/compare/v0.9.1...v0.9.2) (2023-05-12)
+
+
+### Bug Fixes
+
+* makes extra props or validation optional for getFieldListFormField and getValidationSchema ([b4f4b81](https://github.com/blb-ventures/resource/commit/b4f4b8102b8e36df7ee0042166252cdf9e6d1641))
+
 ## [0.9.1](https://github.com/blb-ventures/resource/compare/v0.9.0...v0.9.1) (2023-05-12)
 
 
