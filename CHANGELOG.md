@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.4](https://github.com/blb-ventures/resource/compare/v0.9.3...v0.9.4) (2023-05-13)
+
+
+### Bug Fixes
+
+* fixes react-hook-form not rendering the field correctly ([88b5568](https://github.com/blb-ventures/resource/commit/88b55680585b5c64406b7d64ab67095858b9d501))
+
 ## [0.9.3](https://github.com/blb-ventures/resource/compare/v0.9.2...v0.9.3) (2023-05-13)
 
 
