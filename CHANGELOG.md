@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.3](https://github.com/blb-ventures/resource/compare/v0.9.2...v0.9.3) (2023-05-13)
+
+
+### Bug Fixes
+
+* adds missing validationSchemaBuilder initializer ([2cb1ddd](https://github.com/blb-ventures/resource/commit/2cb1dddba7f2876893b83b9044158058abef958d))
+* fixes getValidationSchema override validation object value type ([a248503](https://github.com/blb-ventures/resource/commit/a2485036188e4265fe6285ae7900545589b85679))
+
 ## [0.9.2](https://github.com/blb-ventures/resource/compare/v0.9.1...v0.9.2) (2023-05-12)
 
 
