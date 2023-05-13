@@ -90,6 +90,7 @@ export class ResourceManager<
     this.defaultFieldManager = options.defaultFieldManager;
     this.defaultFieldObjectManager = options.defaultFieldObjectManager;
     this.fieldObjectManagerByKind = options.fieldObjectManagerByKind;
+    this.validationSchemaBuilder = options.validationSchemaBuilder;
   }
 
   getManager(
