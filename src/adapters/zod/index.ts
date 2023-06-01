@@ -170,7 +170,7 @@ export const isSupportedImage = (allowedImageFormat: string[]) => (input: unknow
   input == null || (isBrowserFile(input) && allowedImageFormat.includes(input.type));
 
 export const isRequired = (validation: FieldValidation) => (input: unknown) =>
-  validation.required && input != null;
+  !validation.required || input != null;
 
 const getFieldKindRules = (validation: FieldValidation, options?: ZodAdapterOptions) => {
   const baseZod =
@@ -192,17 +192,15 @@ const getFieldKindRules = (validation: FieldValidation, options?: ZodAdapterOpti
       .transform(it => (typeof it === 'string' ? it : it?.id ?? null))
       .refine((it: unknown) => it != null, options?.localization?.invalidType),
     [FIELD_KIND.IMAGE]: z
-      .any()
-      .refine(isRequired(validation))
-      .refine(input => input == null || isBrowserFile(input), options?.localization?.invalidType)
+      .instanceof(File, { message: options?.localization?.invalidType })
+      .refine(isRequired(validation), options?.localization?.required)
       .refine(
         isSupportedImage(options?.acceptedImageMimeType ?? DEFAULT_ACCEPTED_IMAGE_MIME_TYPES),
         options?.localization?.allowedImageFormat,
       ),
     [FIELD_KIND.FILE]: z
-      .any()
-      .refine(isRequired(validation))
-      .refine(file => isBrowserFile(file), options?.localization?.invalidType),
+      .instanceof(File, { message: options?.localization?.invalidType })
+      .refine(isRequired(validation), options?.localization?.required),
   };
 };
 
