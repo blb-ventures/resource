@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/blb-ventures/resource/compare/v0.9.4...v0.10.0) (2023-06-01)
+
+
+### Features
+
+* improves image and file field validation ([55ed15e](https://github.com/blb-ventures/resource/commit/55ed15ee9212633dbe2aca6c16f887e18c197996))
+
 ## [0.9.4](https://github.com/blb-ventures/resource/compare/v0.9.3...v0.9.4) (2023-05-13)
 
 
