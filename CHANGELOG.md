@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/blb-ventures/resource/compare/v0.10.0...v0.10.1) (2023-06-14)
+
+
+### Bug Fixes
+
+* adds missing localization to addMultipleValidation ([a8dbb98](https://github.com/blb-ventures/resource/commit/a8dbb98fa8af9cfe1ea9c9c3ccacb81904dfb424))
+
 ## [0.10.0](https://github.com/blb-ventures/resource/compare/v0.9.4...v0.10.0) (2023-06-01)
 
 
