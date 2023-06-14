@@ -222,7 +222,12 @@ export const getValidationUtils = (options?: ZodAdapterOptions) => {
     return schema;
   };
   const addMultipleValidation = <T extends ZodTypeAny>(schema: T, multiple?: boolean) =>
-    multiple ? z.array(schema) : schema;
+    multiple
+      ? z.array(schema, {
+          invalid_type_error: options?.localization?.invalidType,
+          required_error: options?.localization?.required,
+        })
+      : schema;
   const getNumberValidation = (validation: DecimalFieldValidation | IntFieldValidation) => {
     let schema: ZodNumber | ZodNullable<ZodNumber> = z.number();
     if (validation.minValue != null) schema = addMinValue(schema, validation.minValue);
