@@ -75,6 +75,7 @@ export class ResourceManager<
   ) => ValidationSchema;
 
   constructor(
+    /** The imported resources definition object */
     resources: Resources,
     options: ManagerOptions<
       FieldKinds,

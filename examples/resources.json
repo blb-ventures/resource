@@ -1,0 +1,23 @@
+{
+  "User": {
+    "name": "User",
+    "fields": {
+      "name": {
+        "name": "name",
+        "kind": "STRING",
+        "label": "Name",
+        "validation": {
+          "required": false
+        }
+      },
+      "isAdmin": {
+        "name": "isAdmin",
+        "kind": "BOOLEAN",
+        "label": "Is Admin",
+        "validation": {
+          "required": false
+        }
+      }
+    }
+  }
+}
