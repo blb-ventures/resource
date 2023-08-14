@@ -1,5 +1,7 @@
 # Resource
 
+[![build status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fblb-ventures%2Fresource%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/blb-ventures/resource/goto?ref=main)
+
 Library to transform entity definition into form fields, form validation and formatted display values.
 
 There is a backend implementation for Python with Strawberry GraphQL that generates this kinds of files here: https://github.com/blb-ventures/strawberry-resources
@@ -27,9 +29,9 @@ pnpm i @blb-ventures/resource
 
 ## Getting started
 
-### Real use example
+### Real usage example
 
-I've put in the examples directory some React components we use in our projects to simplify rendering and validating a form from a list of fields.
+I've put in the [examples directory](https://github.com/blb-ventures/resource/tree/main/examples) some React components we use in our projects to simplify rendering and validating a form from a list of fields.
 The examples use react-hook-form, zod and mui and I'm open for suggestions on how to use with other libraries.
 
 ### Setup
