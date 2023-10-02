@@ -17,6 +17,12 @@ This library will try do the following:
 - Standardize form validation based on the definition of the field; and
 - Standardize value display formatting based on the definition of the field;
 
+## Roadmap
+
+- [ ] Create a resources file generator directly from a GraphQL Schema
+- [ ] Add FieldObject usage example (form nesting)
+- [ ] Improve documentation and example with other frameworks
+
 ## Install
 
 ```bash

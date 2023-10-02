@@ -62,4 +62,5 @@ export interface APIFieldObject {
   name: string;
   objKind: string;
   objType: string;
+  resource?: string | null;
 }

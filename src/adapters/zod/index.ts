@@ -14,6 +14,7 @@ import {
   ZodTypeAny,
 } from 'zod';
 import {
+  APIField,
   APIFieldUnion,
   DecimalFieldValidation,
   FieldValidation,
@@ -63,6 +64,16 @@ export const FIELD_KIND = {
 
 export type FieldKind = keyof typeof FIELD_KIND;
 
+export const FIELD_OBJECT_KIND = {
+  INPUT: 'INPUT',
+  INPUT_LIST: 'INPUT_LIST',
+  LIST_INPUT: 'LIST_INPUT',
+  OBJECT: 'OBJECT',
+  OBJECT_LIST: 'OBJECT_LIST',
+};
+
+export type FieldObjectKind = keyof typeof FIELD_OBJECT_KIND;
+
 export const DEFAULT_ACCEPTED_IMAGE_MIME_TYPES = [
   'image/jpeg',
   'image/png',
@@ -105,7 +116,7 @@ export interface ZodAdapterOptions {
 }
 
 export const getFieldRules = (
-  field: APIFieldUnion,
+  field: APIField,
   options?: ZodAdapterOptions,
   validation?: FieldValidation,
 ) => {
@@ -152,7 +163,7 @@ export const getFieldRules = (
 };
 
 export const getValidationSchema = (
-  fields: APIFieldUnion[],
+  fields: APIField[],
   options?: ZodAdapterOptions,
   validation?: FieldValidation,
 ): ZodObject<ZodRawShape> =>
@@ -163,7 +174,7 @@ export const getValidationSchema = (
     ),
   );
 
-export const getRulesByName = (fields: APIFieldUnion[]) =>
+export const getRulesByName = (fields: APIField[]) =>
   fields.reduce<ZodRawShape>((acc, it) => ({ ...acc, [it.name]: getFieldRules(it) }), {});
 
 export const isSupportedImage = (allowedImageFormat: string[]) => (input: unknown) =>
