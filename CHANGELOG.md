@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.11.0](https://github.com/blb-ventures/resource/compare/v0.10.1...v0.11.0) (2023-10-02)
+
+
+### Features
+
+* adds FieldObjectKind type and dict ([42f0078](https://github.com/blb-ventures/resource/commit/42f00787a8c6322ea2c9bbfdb5a8fb8eb4869395))
+* adds instructions, descriptions and usage examples to the README.md ([d1ee988](https://github.com/blb-ventures/resource/commit/d1ee98835e91e38501e828247f3182fb81222c51))
+* adds real usage examples ([d1ee988](https://github.com/blb-ventures/resource/commit/d1ee98835e91e38501e828247f3182fb81222c51))
+* adds resource field to APIFieldObject ([42f0078](https://github.com/blb-ventures/resource/commit/42f00787a8c6322ea2c9bbfdb5a8fb8eb4869395))
+
+
+### Code Refactoring
+
+* refactors zod integration function to accept only APIField and not APIFieldUnion ([42f0078](https://github.com/blb-ventures/resource/commit/42f00787a8c6322ea2c9bbfdb5a8fb8eb4869395))
+
+
+### Build System
+
+* **deps-dev:** bump word-wrap from 1.2.3 to 1.2.4 ([912a42d](https://github.com/blb-ventures/resource/commit/912a42d0ce0b01c6572c82f7d8cded2ef383856c))
+
+
+### Miscellaneous
+
+* adds a README.md to examples ([2172610](https://github.com/blb-ventures/resource/commit/21726109d7d48ef2dd7246dcca465be1b9216b39))
+* adds example screenshot to README.md ([64ca047](https://github.com/blb-ventures/resource/commit/64ca0479f41ba9052ed646caf052867cef4471ad))
+* adds examples directory link to the reference in the main README.md ([2172610](https://github.com/blb-ventures/resource/commit/21726109d7d48ef2dd7246dcca465be1b9216b39))
+* adds github actions build status for the repo ([2172610](https://github.com/blb-ventures/resource/commit/21726109d7d48ef2dd7246dcca465be1b9216b39))
+* adds MIT LICENSE file ([2172610](https://github.com/blb-ventures/resource/commit/21726109d7d48ef2dd7246dcca465be1b9216b39))
+
 ## [0.10.1](https://github.com/blb-ventures/resource/compare/v0.10.0...v0.10.1) (2023-06-14)
 
 
