@@ -186,3 +186,18 @@ return (
   }
 }
 ```
+
+## Simple Example Screenshot
+
+### React Component
+
+![code](https://github.com/blb-ventures/resource/assets/810728/95c03b62-150c-451f-9306-c993cf34a210)
+
+### Fields Definition
+
+![code3](https://github.com/blb-ventures/resource/assets/810728/87040660-05ac-4bb3-9773-015dcb47f928)
+
+### Result
+
+![Screenshot 2023-08-14 at 1 15 17 PM](https://github.com/blb-ventures/resource/assets/810728/fabc4486-f644-4412-8cbc-b8543a32c25d)
+
